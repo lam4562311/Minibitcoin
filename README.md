@@ -1,0 +1,2 @@
+# Minibitcoin
+Miniproject of bitcoin
