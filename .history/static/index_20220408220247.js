@@ -23,7 +23,7 @@ function get_node_list(){
             url:"/get_nodes",
             dataType: "json",
             success: (data) => {
-                full_node_span.innerHTML = JSON.stringify(data);
+                
             }
         }
     )

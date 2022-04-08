@@ -2,7 +2,7 @@ let get_chain_bt = document.querySelector("#get_chain_bt");
 let get_node_bt = document.querySelector("#get_node_bt");
 
 let full_chain_span = document.querySelector("#fullchain_span")
-let full_node_span = document.querySelector("#node_list_span")
+
 function get_full_chain(){
     $.ajax({
         type: "GET",
@@ -23,7 +23,7 @@ function get_node_list(){
             url:"/get_nodes",
             dataType: "json",
             success: (data) => {
-                full_node_span.innerHTML = JSON.stringify(data);
+                
             }
         }
     )
