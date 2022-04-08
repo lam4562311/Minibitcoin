@@ -34,6 +34,27 @@ class Transaction:          #Transaction
             return verifier.verify(h, binascii.unhexlify(self.signature))
         else:
             return False
+            
+    def verify_sender_balance(self): # kind of works but double spending (tx on same block) still needs to be addressed
+        if hasattr(self, 'sender') :
+            balance = 0.0
+            print(blockchain.chain)
+            for block_json in blockchain.chain:
+                block = json.loads(block_json)
+                print("Block: " + json.dumps(block))
+                if len(block["transactions"]) > 0:
+                    for tx_json in block["transactions"]:
+                        tx = json.loads(tx_json)
+                        if tx["recipient"] == self.sender:
+                            balance += float(tx["value"])
+                        if tx["sender"] == self.sender:
+                            balance -= float(tx["value"])
+                            
+            print("Balance: " + str(balance) + " / sending: " + self.value)
+            if balance >= float(self.value):
+                return True
+        return False
+            
 
     def to_json(self):
         return json.dumps( self.__dict__, sort_keys = False)
@@ -98,7 +119,7 @@ class Blockchain:       #Blockchain
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block.to_json())
     def add_new_transaction(self, transaction: Transaction):
-        if transaction.verify_transaction_signature():
+        if transaction.verify_transaction_signature() and transaction.verify_sender_balance():
             self.unconfirmed_transactions.append(transaction.to_json())
             return True
         else:
@@ -243,7 +264,7 @@ def new_transaction():
         return 'Missing values ', 400
     
     #Create a new Transaction
-    transaction = Transaction(myWallet.identity, values['recipient_address'], values[ ' amount'])
+    transaction = Transaction(myWallet.identity, values['recipient_address'], values[ 'amount'])
     transaction.add_signature(myWallet.sign_transaction(transaction))
     transaction_result = blockchain.add_new_transaction(transaction)
     
