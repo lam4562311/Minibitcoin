@@ -35,13 +35,13 @@ class Transaction:          #Transaction
         else:
             return False
             
-    def verify_sender_balance(self): # kind of works but double spending (tx on same block) still needs to be addressed
+    def verify_sender_balance(self):
         if hasattr(self, 'sender') :
             balance = 0.0
-            print(blockchain.chain)
-            for block_json in blockchain.chain:
+            print(blockchain.chain) # debug
+            for block_json in blockchain.chain: # 1: confirmed historical blocks
                 block = json.loads(block_json)
-                print("Block: " + json.dumps(block))
+                print("Block: " + json.dumps(block)) # debug
                 if len(block["transactions"]) > 0:
                     for tx_json in block["transactions"]:
                         tx = json.loads(tx_json)
@@ -49,8 +49,16 @@ class Transaction:          #Transaction
                             balance += float(tx["value"])
                         if tx["sender"] == self.sender:
                             balance -= float(tx["value"])
+            
+            if len(blockchain.unconfirmed_transactions) > 0: # 2: unconfirmed tx mempool
+                for unconfimed_tx_json in blockchain.unconfirmed_transactions: 
+                    unconfimed_tx = json.loads(unconfimed_tx_json)
+                    if unconfimed_tx["recipient"] == self.sender:
+                        balance += float(unconfimed_tx["value"])
+                    if unconfimed_tx["sender"] == self.sender:
+                        balance -= float(unconfimed_tx["value"])
                             
-            print("Balance: " + str(balance) + " / sending: " + self.value)
+            print("Balance: " + str(balance) + " / sending: " + self.value) # debug
             if balance >= float(self.value):
                 return True
         return False
