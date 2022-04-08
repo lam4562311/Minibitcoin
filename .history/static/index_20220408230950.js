@@ -5,9 +5,8 @@ let full_chain_span = document.querySelector("#fullchain_span")
 let full_node_span = document.querySelector("#node_list_span")
 let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
-
-hostname_span.innerHTML = window.location.hostname;
-client_id_span.innerHTML = window.location.port;
+hostname_span = window.location.hostname;
+client_id_span = window.location.port;
 
 function get_full_chain(){
     $.ajax({
