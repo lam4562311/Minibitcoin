@@ -9,7 +9,7 @@ import binascii
 import json
 import re
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from urllib.parse import urlparse
 import datetime
 
@@ -345,35 +345,12 @@ def mine():
     }
     return jsonify( response), 200
 
-
-# list_of_user=[]
-
-# class MyFrame(wx.Frame):
-#     def __init__(self):
-#         super().__init__(parent=None, title='Mini Application')         #init App
-#         panel = wx.Panel(self)
-#         wx.StaticText(panel, -1, "Type your account name",   
-#                 (5, 10)) 
-#         self.text_ctrl = wx.TextCtrl(panel, pos=(5, 30))                 #TextBox
-#         createwallet = wx.Button(panel, label='Create Wallet', pos=(5, 65))  #Button
-#         createwallet.Bind(wx.EVT_BUTTON, self.onpress)                  #bind Button
-#         self.Show()
-
-#     def __del__(self):
-#         pass
-
-#     def onpress(self, event):
-#         tmp = self.text_ctrl.GetValue()
-#         if tmp is '':                                #string check
-#             wx.MessageBox('The Box is empty')
-#             pass
-#         elif re.search("^(?![0-9])[0-9A-Za-z_]*$", tmp):
-#             globals()[tmp] = Wallet()                       #set new variable call with string
-#             tmp=str(tmp)
-#             list_of_user.append(globals().get(tmp, None))   #append to the list
+@app.route('/')
+def index():
+    return render_template('homepage.html')
 
 if __name__ == '__main__':
     myWallet = Wallet()
     blockchain = Blockchain()
     port = 5000
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='127.0.0.1', port=port, debug = True)
