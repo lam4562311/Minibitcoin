@@ -52,25 +52,15 @@
         </form>
         <span id="register_node_span"></span>
         <br>
-        <div class="row">
-            <div class="column" style="background-color:#EEEEEE">
-                    <div class="center">
                         <button id="get_chain_bt">get fullchain</button>
-                    </div>
                 <br>
                 <span id="fullchain_span"></span>
                 <br>
 
-            </div>
-            <div class="column" style="background-color:#DDDDDD">
-                    <div class="center" style="left:75% !important">
                         <button id="get_node_bt">get node list</button>
-                    </div>
                 <br>
                 <span id="node_list_span"></span>
                 <br>
-            </div>
-        </div>
         <a href='/export_key'>Download Private Key</a>
 		
 		<form action = "/import_key" method = "POST" 
@@ -89,6 +79,9 @@
             <input type="submit" value="Submit" id="transaction_submit">
         </form>
         <span id="transaction_submit_span"></span>
+        <span id="mining_result"></span>
+        <br>
+        <button id="mining_bt">mine</button>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="{{url_for("static", filename="index.js")}}"></script>
     </body>

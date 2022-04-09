@@ -11,6 +11,8 @@ let transaction_submit_span = document.getElementById("#transcation_submit_span"
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
 let status_span = document.querySelector("#status_span")
 let publickey_span = document.querySelector("#publickey_span")
+let mining_result_span = document.querySelector("#mining_result")
+
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
 
@@ -29,12 +31,12 @@ function get_full_chain(){
 function get_node_list(){
     $.ajax(
         {
-            type: "GET",
+            type: "get",
             contentType: "application/json; charset: utf-8",
             url:"/get_nodes",
             dataType: "json",
             success: (data) => {
-                full_node_span.innerHTML = JSON.stringify(data);
+                full_node_span.innerHTML = "Clients: "+JSON.stringify(data.nodes);
             } 
         }
     );
@@ -62,16 +64,16 @@ function formSubmit(event) {
         type: 'post',
         data:$('#Register_form').serialize(),
         statusCode: {
-            201: function(response) {
+            200: function(response) {
                 register_node_span.innerHTML = JSON.stringify(response);
             },
-            200: function(response) {
+            201: function(response) {
                 alert(JSON.stringify(response.message));
-                register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
+                register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
             },
             400: function(response) {
                 alert(JSON.stringify(response.message));
-                register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
+                register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
             },
         }
     });
@@ -97,6 +99,25 @@ function transactionSubmit(event) {
     });
 }
 
+function mining(event){
+    $.ajax({
+        url: '/mine',
+        type :'get',
+        contentType: "application/json; charset: utf-8",
+        dataType: 'json',
+        success: (data) => {
+            mining_result_span.innerHTML = JSON.stringify(data);
+            $.ajax({
+                type: "PUT",
+                url: "/update_balance",
+                success: (data1) => {
+                    alert(JSON.stringify(data1));
+                }
+            });
+        }
+    });
+}
+
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
 $(get_status_bt).click(()=>get_status());
@@ -107,3 +128,4 @@ $(show_publickey).click(()=>{var x = document.getElementById("publickey_div").st
                                 }else{
                                     document.getElementById("publickey_div").style.display = "none";
                                 }});
+$(mining_bt).click(()=>mining());

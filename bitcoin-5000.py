@@ -61,7 +61,7 @@ def get_nodes():
     response = {'nodes' : nodes}
     return jsonify(response), 200
 
-@app.route('/register_node', methods=['PoST'])
+@app.route('/register_node', methods=['POST'])
 def register_node():
     values = request.form
     node = values.get('node')
@@ -145,6 +145,13 @@ def get_status():
         'balance': blockchain.get_balance(myWallet.identity)
     }
     return jsonify(response),200
+
+@app.route('/update_balance', methods=['PUT'])
+def update_balance():
+    myWallet.balance = blockchain.get_balance(myWallet.identity)
+    response = {'message': 'Balance updated'}
+    return jsonify(response), 200
+
 @app.route('/')
 def index():
     return render_template('homepage.html')

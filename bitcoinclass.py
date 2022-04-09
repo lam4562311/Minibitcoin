@@ -69,7 +69,7 @@ class Wallet:       #Wallet
         random = Crypto.Random.new().read
         self._private_key = RSA.generate(1024,random)
         self._public_key = self._private_key.publickey()
-        self.balance = 1000.0
+        self.balance = 0.0
     def sign_transaction(self, transaction: Transaction) :
         signer = PKCS1_v1_5.new(self._private_key)
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
