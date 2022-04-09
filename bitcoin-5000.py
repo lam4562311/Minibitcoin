@@ -7,6 +7,7 @@ import json
 import re
 import requests
 import io
+import logging
 app = Flask(__name__)
 
 #Flask API
@@ -84,6 +85,7 @@ def register_node():
 
     replaced = blockchain.consensus()    
     if replaced:
+        app.logger.warning('replaced')
         response ={
         'message' : 'Longer authoritative chain found from peers, replacing ours' ,
         'total_nodes ' : [node for node in blockchain.nodes]}
@@ -98,10 +100,12 @@ def register_node():
 def consensus():
     replaced = blockchain.consensus()
     if replaced:
+        app.logger.info('replaced')
         response = {
             'message' : 'our chain was replaced', 
         }
     else:
+        app.logger.info('not replaced')
         response = {
         'message ' : 'our chain is authoritative',
         }
@@ -110,9 +114,10 @@ def consensus():
 @app.route('/mine', methods=[ 'GET'])
 def mine():
     blockchain.boardcast_transactions(request.host)
+    
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
-        requests.get('http://' + node + '/consensus' )
+        ans = requests.get('http://' + node + '/consensus')
     response = {
         'index' : newblock.index,
         'transactions' : newblock.transactions,
@@ -172,4 +177,5 @@ if __name__ == '__main__':
     myWallet = Wallet()
     blockchain = Blockchain()
     port = 5000
+    app.logger.setLevel(logging.DEBUG)
     app.run(host='127.0.0.1', port=port, debug = True)

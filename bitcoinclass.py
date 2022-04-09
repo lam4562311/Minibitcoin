@@ -223,7 +223,7 @@ class Blockchain:       #Blockchain
                     return False
             if isinstance( current_block.transactions, list):
                 for transaction in current_block.transactions:
-                    transaction = json. loads(transaction)
+                    transaction = json.loads(transaction)
                     if transaction['sender'] == 'Block_Reward':
                         continue
                     current_transaction = Transaction(transaction['sender'],
@@ -257,7 +257,7 @@ class Blockchain:       #Blockchain
             if response.status_code == 200:
                 length = response.json()['length']
                 chain = response.json()['chain']
-            
+
             # Check if the length is longer and the chain is valid
             if length > max_length and self.valid_chain(chain):
                 max_length = length
@@ -280,7 +280,7 @@ class Blockchain:       #Blockchain
             for transaction_json in transactions:
                 transaction = json.loads(transaction_json)
                 if transaction['sender'] == address:
-                    balance -= (float(transaction['value']) + float(transaction['fee']))
+                    balance -= (float(transaction['value']))
                 if transaction['recipient'] == address:
                     balance += float(transaction['value'])
         return balance
