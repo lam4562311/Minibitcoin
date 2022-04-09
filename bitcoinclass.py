@@ -290,7 +290,7 @@ class Blockchain:       #Blockchain
         nodes.append(self_address)
         transactions =[]
         for node in nodes:
-            response = requests.get('http://'+ node +'/consensusget_transactions')
+            response = requests.get('http://'+ node +'/get_transactions')
             if response.status_code == 200:
                 t= response.json()['transactions']
                 for it in t:
