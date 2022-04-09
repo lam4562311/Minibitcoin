@@ -7,7 +7,6 @@ let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
 let register_node_span = document.querySelector("#register_node_span")
 let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit);
-let transaction_submit_span = document.getElementById("#transcation_submit_span")
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit);
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
@@ -50,11 +49,11 @@ function formSubmit(event) {
                 register_node_span.innerHTML = JSON.stringify(response);
             },
             200: function(response) {
-                alert(JSON.stringify(response.message));
+                alert(JSON.stringify(response.messages));
                 register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
             },
             400: function(response) {
-                alert(JSON.stringify(response.message));
+                alert(JSON.stringify(response.messages));
                 register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
             },
         }
@@ -64,18 +63,20 @@ function formSubmit(event) {
 function transactionSubmit(event) {
     event.preventDefault();
     $.ajax({
-        url : "/new_transaction",
+        url : "/register_node",
         type: 'post',
-        data:$('#transaction_form').serialize(),
+        data:$('#Register_form').serialize(),
         statusCode: {
             201: function(response) {
-                register_node_span.innerHTML = JSON.stringify(response.message);
+                register_node_span.innerHTML = JSON.stringify(response);
+            },
+            200: function(response) {
+                alert(JSON.stringify(response.messages));
+                register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
             },
             400: function(response) {
-                alert(JSON.stringify(response));
-            },
-            406: function(response) {
-                alert(JSON.stringify(response.message));
+                alert(JSON.stringify(response.messages));
+                register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
             },
         }
     });

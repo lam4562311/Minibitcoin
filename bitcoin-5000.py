@@ -25,10 +25,10 @@ def new_transaction():
     transaction_result = blockchain.add_new_transaction(transaction)
     
     if transaction_result:
-        response = { 'message ': 'Transaction will be added to Block '}
+        response = { 'message': 'Transaction will be added to Block '}
         return jsonify(response), 201
     else:
-        response = {'message ': 'Invalid Transaction! '}
+        response = {'message': 'Invalid Transaction! '}
         return jsonify(response), 406
 
 @app.route( '/get_transactions' , methods=[ 'GET'])

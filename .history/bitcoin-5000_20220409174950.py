@@ -129,5 +129,5 @@ def index():
 if __name__ == '__main__':
     myWallet = Wallet()
     blockchain = Blockchain()
-    port = 5002
+    port = 5000
     app.run(host='127.0.0.1', port=port, debug = True)
