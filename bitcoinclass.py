@@ -283,3 +283,16 @@ class Blockchain:       #Blockchain
                 if transaction['recipient'] == address:
                     balance += float(transaction['value'])
         return balance
+    
+    def boardcast_transactions(self, self_address):
+        nodes = [node for node in self.nodes]
+        nodes.append(self_address)
+        transactions =[]
+        for node in nodes:
+            response = requests.get('http://'+ node +'/get_transactions')
+            if response.status_code == 200:
+                t= response.json()['transactions']
+                for it in t:
+                    transactions.append(it)
+        self.unconfirmed_transactions=transactions
+        return True
