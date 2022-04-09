@@ -61,6 +61,13 @@
             </div>
         </div>
         <a href='/export_key'>Download Private Key</a>
+		
+		<form action = "/import_key" method = "POST" 
+         enctype = "multipart/form-data">
+		 Upload Key
+         <input type = "file" name = "file" />
+         <input type = "submit"/>
+		</form>
         <p><strong>New Transaction</strong><br>
         </p>
         <form  method="post" id="transaction_form">
