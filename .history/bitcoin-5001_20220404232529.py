@@ -1,3 +1,5 @@
+from operator import contains
+import wx
 import Crypto 
 import Crypto.Random
 from Crypto.PublicKey import RSA
@@ -6,9 +8,12 @@ from Crypto.Hash import SHA256
 import binascii
 import json
 import re
-from urllib.parse import urlparse
 import requests
+from flask import Flask, jsonify, request
+from urllib.parse import urlparse
 import datetime
+
+app = Flask(__name__)
 
 class Transaction:          #Transaction
     def __init__(self, sender,recipient,value):
@@ -29,35 +34,6 @@ class Transaction:          #Transaction
             return verifier.verify(h, binascii.unhexlify(self.signature))
         else:
             return False
-            
-    def verify_sender_balance(self):
-        if hasattr(self, 'sender') :
-            balance = 0.0
-            print(blockchain.chain) # debug
-            for block_json in blockchain.chain: # 1: confirmed historical blocks
-                block = json.loads(block_json)
-                print("Block: " + json.dumps(block)) # debug
-                if len(block["transactions"]) > 0:
-                    for tx_json in block["transactions"]:
-                        tx = json.loads(tx_json)
-                        if tx["recipient"] == self.sender:
-                            balance += float(tx["value"])
-                        if tx["sender"] == self.sender:
-                            balance -= float(tx["value"])
-            
-            if len(blockchain.unconfirmed_transactions) > 0: # 2: unconfirmed tx mempool
-                for unconfimed_tx_json in blockchain.unconfirmed_transactions: 
-                    unconfimed_tx = json.loads(unconfimed_tx_json)
-                    if unconfimed_tx["recipient"] == self.sender:
-                        balance += float(unconfimed_tx["value"])
-                    if unconfimed_tx["sender"] == self.sender:
-                        balance -= float(unconfimed_tx["value"])
-                            
-            print("Balance: " + str(balance) + " / sending: " + self.value) # debug
-            if balance >= float(self.value):
-                return True
-        return False
-            
 
     def to_json(self):
         return json.dumps( self.__dict__, sort_keys = False)
@@ -68,7 +44,7 @@ class Wallet:       #Wallet
         random = Crypto.Random.new().read
         self._private_key = RSA.generate(1024,random)
         self._public_key = self._private_key.publickey()
-        self.balance = 0.0
+    
     def sign_transaction(self, transaction: Transaction) :
         signer = PKCS1_v1_5.new(self._private_key)
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
@@ -84,12 +60,7 @@ class Wallet:       #Wallet
     def private(self):
         private_key = binascii.hexlify( self._private_key.exportKey(format='DER'))
         return private_key.decode('ascii')
-    
-    def update_balance(self, value):
-        self.balance = value
-    
-    def get_balance(self):
-        return self.balance
+
 class Block :       #Block
     def __init__(self, index, transactions, timestamp, previous_hash):
         self.index = index
@@ -127,7 +98,7 @@ class Blockchain:       #Blockchain
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block.to_json())
     def add_new_transaction(self, transaction: Transaction):
-        if transaction.verify_transaction_signature() and transaction.verify_sender_balance():
+        if transaction.verify_transaction_signature():
             self.unconfirmed_transactions.append(transaction.to_json())
             return True
         else:
@@ -260,3 +231,149 @@ class Blockchain:       #Blockchain
                 return True
             return False
 
+
+#Flask API
+@app.route('/new_transaction', methods=['POST'])
+def new_transaction():
+    values = request.form
+    
+    # Check that the required fields are in the PoST'ed data
+    required = ['recipient_address', 'amount']
+    if not all(k in values for k in required):
+        return 'Missing values ', 400
+    
+    #Create a new Transaction
+    transaction = Transaction(myWallet.identity, values['recipient_address'], values[ ' amount'])
+    transaction.add_signature(myWallet.sign_transaction(transaction))
+    transaction_result = blockchain.add_new_transaction(transaction)
+    
+    if transaction_result:
+        response = { 'message ': 'Transaction will be added to Block '}
+        return jsonify(response), 201
+    else:
+        response = {'message ': 'Invalid Transaction! '}
+        return jsonify(response), 406
+
+@app.route( '/get_transactions' , methods=[ 'GET'])
+def get_transactions():
+    #Get transactions from transactions pool
+    transactions = blockchain.unconfirmed_transactions
+    response = {'transactions' : transactions}
+    return jsonify(response), 200
+
+@app.route('/chain', methods=['GET'])
+def last_ten_blocks():
+    response = {
+        'chain' : blockchain.chain[-10:],
+        'length': len(blockchain.chain),
+    }
+    return jsonify(response), 200
+
+
+@app.route('/fullchain', methods=['GET'])
+def full_chain():
+    response = {
+    'chain' : json.dumps(blockchain.chain), 
+    'length' : len(blockchain.chain),
+    }
+    return jsonify (response), 200
+
+@app.route('/get_nodes', methods=['GET'])
+def get_nodes():
+    nodes = list(blockchain.nodes)
+    response = {'nodes' : nodes}
+    return jsonify(response), 200
+
+@app.route('/register_node', methods=['PoST'])
+def register_node():
+    values = request.form
+    node = values.get('node')
+    com_port = values.get('com_port')
+    if com_port is not None:
+        blockchain.register_node(request.remote_addr + ":" + com_port)
+        return "ok", 200
+    if node is None and com_port is None:
+        return "Error: Please supply a valid list of nodes", 400
+    
+    blockchain.register_node(node)
+    node_list = requests.get('http://' + node + '/get_nodes')
+    if node_list.status_code == 200:
+        node_list = node_list.json()['nodes']
+        for node in node_list:
+            blockchain.register_node( node)
+        
+    for new_nodes in blockchain.nodes:
+        requests.post( 'http://' + new_nodes + '/register_node' , data={'com_port':str(port)})
+
+    replaced = blockchain.consensus()    
+    if replaced:
+        response ={
+        'message' : 'Longer authoritative chain found from peers, replacing ours' ,
+        'total_nodes ' : [node for node in blockchain.nodes]}
+    else:
+        response ={
+        'message': 'New nodes have been added,but our chain is authoritative',
+        'total_nodes' : [node for node in blockchain.nodes]
+    }
+    return jsonify(response), 201
+
+@app.route('/consensus', methods=['GET'])
+def consensus():
+    replaced = blockchain.consensus()
+    if replaced:
+        response = {
+            'message' : 'our chain was replaced', 
+        }
+    else:
+        response = {
+        'message ' : 'our chain is authoritative',
+        }
+    return jsonify(response), 200
+
+@app.route('/mine', methods=[ 'GET'])
+def mine():
+    newblock = blockchain.mine(myWallet)
+    for node in blockchain.nodes:
+        requests.get('http://' + node + '/consensus' )
+    response = {
+        'index' : newblock.index,
+        'transactions' : newblock.transactions,
+        'timestamp' : newblock.timestamp,
+        'nonce' : newblock.nonce,
+        'hash' : newblock.hash,
+        'previous_hash' : newblock.previous_hash
+    }
+    return jsonify( response), 200
+
+
+# list_of_user=[]
+
+# class MyFrame(wx.Frame):
+#     def __init__(self):
+#         super().__init__(parent=None, title='Mini Application')         #init App
+#         panel = wx.Panel(self)
+#         wx.StaticText(panel, -1, "Type your account name",   
+#                 (5, 10)) 
+#         self.text_ctrl = wx.TextCtrl(panel, pos=(5, 30))                 #TextBox
+#         createwallet = wx.Button(panel, label='Create Wallet', pos=(5, 65))  #Button
+#         createwallet.Bind(wx.EVT_BUTTON, self.onpress)                  #bind Button
+#         self.Show()
+
+#     def __del__(self):
+#         pass
+
+#     def onpress(self, event):
+#         tmp = self.text_ctrl.GetValue()
+#         if tmp is '':                                #string check
+#             wx.MessageBox('The Box is empty')
+#             pass
+#         elif re.search("^(?![0-9])[0-9A-Za-z_]*$", tmp):
+#             globals()[tmp] = Wallet()                       #set new variable call with string
+#             tmp=str(tmp)
+#             list_of_user.append(globals().get(tmp, None))   #append to the list
+
+if __name__ == '__main__':
+    myWallet = Wallet()
+    blockchain = Blockchain()
+    port = 5001
+    app.run(host='127.0.0.1', port=port)
