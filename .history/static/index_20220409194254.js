@@ -10,7 +10,6 @@ let Register_node_submit_listener = document.getElementById("Register_form").add
 let transaction_submit_span = document.getElementById("#transcation_submit_span")
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
 let status_span = document.querySelector("#status_span")
-
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
 
@@ -98,4 +97,4 @@ function transactionSubmit(event) {
 
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
-$(get_status_bt).click(()=>get_status());
+$(get_status).click(()=>get_status());

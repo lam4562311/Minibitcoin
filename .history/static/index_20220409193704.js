@@ -6,11 +6,10 @@ let full_node_span = document.querySelector("#node_list_span")
 let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
 let register_node_span = document.querySelector("#register_node_span")
-let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit)
+let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit);
 let transaction_submit_span = document.getElementById("#transcation_submit_span")
-let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
+let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit);
 let status_span = document.querySelector("#status_span")
-
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
 
@@ -39,7 +38,6 @@ function get_node_list(){
         }
     );
 }
-
 function get_status(){
     $.ajax(
         {
@@ -53,7 +51,6 @@ function get_status(){
         }
     );
 }
-
 function formSubmit(event) {
     event.preventDefault();
     $.ajax({
@@ -98,4 +95,3 @@ function transactionSubmit(event) {
 
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
-$(get_status_bt).click(()=>get_status());
