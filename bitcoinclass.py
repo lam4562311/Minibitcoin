@@ -31,7 +31,7 @@ class Transaction:          #Transaction
             return False
         
     
-    def verify_sender_balance(self):
+    def verify_sender_balance(self, blockchain):
         if hasattr(self, 'sender') :
             balance = 0.0
             print(blockchain.chain) # debug
@@ -134,7 +134,7 @@ class Blockchain:       #Blockchain
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block.to_json())
     def add_new_transaction(self, transaction: Transaction):
-        if transaction.verify_transaction_signature() and transaction.verify_sender_balance():
+        if transaction.verify_transaction_signature() and transaction.verify_sender_balance(self):
             self.unconfirmed_transactions.append(transaction.to_json())
             return True
         else:
