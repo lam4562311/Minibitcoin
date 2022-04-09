@@ -138,6 +138,12 @@ def export_key():
         as_attachment = True,
         attachment_filename = "keyfile")
 
+@app.route('/get_status', methods=['GET'])
+def get_status():
+    response ={
+        'public_key' : myWallet.identity,
+        'balance': blockchain.get_balance(myWallet.identity)
+    }
 @app.route('/')
 def index():
     return render_template('homepage.html')

@@ -29,8 +29,7 @@ class Transaction:          #Transaction
             return verifier.verify(h, binascii.unhexlify(self.signature))
         else:
             return False
-        
-    
+            
     def verify_sender_balance(self):
         if hasattr(self, 'sender') :
             balance = 0.0
@@ -267,19 +266,3 @@ class Blockchain:       #Blockchain
                 return True
             return False
 
-    def get_balance(self, address):
-    #get the balance from the given address
-        
-        balance = 0.0
-        if len(self.chain) <= 0:
-            return balance
-        for block_json in self.chain:
-            block = json.loads(block_json)
-            transactions = block['transactions']
-            for transaction_json in transactions:
-                transaction = json.loads(transaction_json)
-                if transaction['sender'] == address:
-                    balance -= (float(transaction['value']) + float(transaction['fee']))
-                if transaction['recipient'] == address:
-                    balance += float(transaction['value'])
-        return balance
