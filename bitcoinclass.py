@@ -74,6 +74,12 @@ class Wallet:       #Wallet
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
         return binascii.hexlify(signer.sign(h)).decode('ascii')
 
+    def import_key(self, input_key):
+        self._private_key = RSA.import_key(input_key)
+        self._public_key = self._private_key.publickey()
+
+    def export_key(self):
+        return self._private_key.exportKey(format='DER')
 
     @property
     def identity(self):
