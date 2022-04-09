@@ -144,6 +144,7 @@ def get_status():
         'public_key' : myWallet.identity,
         'balance': blockchain.get_balance(myWallet.identity)
     }
+    return jsonify(response),200
 @app.route('/')
 def index():
     return render_template('homepage.html')
