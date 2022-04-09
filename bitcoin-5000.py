@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import json
 import re
 import requests
-
+import io
 app = Flask(__name__)
 
 #Flask API
