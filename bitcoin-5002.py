@@ -1,12 +1,12 @@
 from operator import contains
 import wx
 from bitcoinclass import Transaction,Wallet,Block,Blockchain
-from flask import Flask, jsonify, request, render_template, redirect,url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file
 from urllib.parse import urlparse
 import json
 import re
 import requests
-
+import io
 app = Flask(__name__)
 
 #Flask API
@@ -122,6 +122,29 @@ def mine():
     }
     return jsonify( response), 200
 
+@app.route('/import_key', methods=['POST'])
+def import_key():
+    f = request.files['file']
+    blob = f.read()
+    myWallet.import_key(blob)
+    return 'key imported successfully'
+
+@app.route('/export_key', methods=['GET'])
+def export_key():
+    blob = myWallet.export_key()
+    return send_file(
+        io.BytesIO(blob),
+        mimetype='application/octet-stream',
+        as_attachment = True,
+        attachment_filename = "keyfile")
+
+@app.route('/get_status', methods=['GET'])
+def get_status():
+    response ={
+        'public_key' : myWallet.identity,
+        'balance': blockchain.get_balance(myWallet.identity)
+    }
+    return jsonify(response),200
 @app.route('/')
 def index():
     return render_template('homepage.html')

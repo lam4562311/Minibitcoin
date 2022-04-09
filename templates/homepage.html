@@ -19,6 +19,11 @@
         /* Clear floats after the columns */
         .row {
             display: flex;
+        }
+        .publickey_div {
+            width: 100%;
+            display: block;
+          }
         </style>
 </head>
     <body>
@@ -28,8 +33,14 @@
         <span id="hostname_span"></span><br>
         <span>client:</span>
         <span id="client_id_span"></span><br>
-        <span id="status_span"></span><br>
-        <button id="get_status_bt">get current status</button>
+        <span id="status_span"></span>
+        <button id="get_status_bt">get current balance</button>
+        <br>
+        <div id ="publickey_div">
+        <span id="publickey_span"></span>
+        <br>
+        </div>
+        <button id="show_publickey">show / hide Publickey</button>
         <p><strong>Register client node</strong><br>
         </p>
         <form  method="post" id="Register_form">
@@ -71,9 +82,9 @@
         <p><strong>New Transaction</strong><br>
         </p>
         <form  method="post" id="transaction_form">
-            <label for="recipient">Recipient publickey address:</label>
-            <input type="text" id="address" name="address"><br><br>
-            <label for="port"> amount:</label>
+            <label for="recipient_address">Recipient publickey address:</label>
+            <input type="text" id="recipient_address" name="recipient_address"><br><br>
+            <label for="amount"> amount:</label>
             <input type="text" id="amount" name="amount"><br><br>
             <input type="submit" value="Submit" id="transaction_submit">
         </form>

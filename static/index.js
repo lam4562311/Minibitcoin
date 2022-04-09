@@ -10,7 +10,7 @@ let Register_node_submit_listener = document.getElementById("Register_form").add
 let transaction_submit_span = document.getElementById("#transcation_submit_span")
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
 let status_span = document.querySelector("#status_span")
-
+let publickey_span = document.querySelector("#publickey_span")
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
 
@@ -48,7 +48,8 @@ function get_status(){
             url:"/get_status",
             dataType: "json",
             success: (data) => {
-                status_span.innerHTML = JSON.stringify(data);
+                status_span.innerHTML = "Balance: "+JSON.stringify(data.balance);
+                publickey_span.innerHTML = "Public Key: \n"+JSON.stringify(data.public_key);
             } 
         }
     );
@@ -99,3 +100,10 @@ function transactionSubmit(event) {
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
 $(get_status_bt).click(()=>get_status());
+$(show_publickey).click(()=>{var x = document.getElementById("publickey_div").style.display;
+                                if(x==="none")
+                                {
+                                    document.getElementById("publickey_div").style.display = "block";
+                                }else{
+                                    document.getElementById("publickey_div").style.display = "none";
+                                }});
