@@ -44,19 +44,13 @@ function formSubmit(event) {
         url : "/register_node",
         type: 'post',
         data:$('#Register_form').serialize(),
+        success:function(response){
+            register_node_span.innerHTML = JSON.stringify(response);
+        },
         statusCode: {
             201: function(response) {
               alert(JSON.stringify(response));
-        },
-        200: function(response) {
-            register_node_span.innerHTML = JSON.stringify(response);
-        },
-      statusCode: {
-        400: function(response) {
-            alert(JSON.stringify(response));
-        },
-    }
-}
+        }}
     });
   }
 $(get_chain_bt).click(()=>get_full_chain());

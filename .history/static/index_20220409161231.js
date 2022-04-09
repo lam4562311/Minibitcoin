@@ -47,16 +47,17 @@ function formSubmit(event) {
         statusCode: {
             201: function(response) {
               alert(JSON.stringify(response));
-        },
+        }
+    ,statusCode: {
         200: function(response) {
             register_node_span.innerHTML = JSON.stringify(response);
-        },
+      }},
       statusCode: {
         400: function(response) {
             alert(JSON.stringify(response));
+      }},
         },
-    }
-}
+        
     });
   }
 $(get_chain_bt).click(()=>get_full_chain());

@@ -5,7 +5,7 @@ let full_chain_span = document.querySelector("#fullchain_span")
 let full_node_span = document.querySelector("#node_list_span")
 let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
-let register_node_span = document.querySelector("#register_node_span")
+
 let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit);
 
 hostname_span.innerHTML = window.location.hostname;
@@ -37,27 +37,8 @@ function get_node_list(){
         }
     )
 }
+function attachFormSubmitEvent(Register_form){
 
-function formSubmit(event) {
-    event.preventDefault();
-    $.ajax({
-        url : "/register_node",
-        type: 'post',
-        data:$('#Register_form').serialize(),
-        statusCode: {
-            201: function(response) {
-              alert(JSON.stringify(response));
-        },
-        200: function(response) {
-            register_node_span.innerHTML = JSON.stringify(response);
-        },
-      statusCode: {
-        400: function(response) {
-            alert(JSON.stringify(response));
-        },
-    }
 }
-    });
-  }
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
