@@ -5,7 +5,7 @@
         .center {
           margin:10px 0px 10px 0px;
           position: absolute;
-          left: 25%;
+          justify-content: center;
           -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
         }
@@ -47,18 +47,16 @@
                 <br>
                 <span id="fullchain_span"></span>
                 <br>
-
             </div>
             <div class="column" style="background-color:#DDDDDD">
-                    <div class="center" style="left:75% !important">
+                    
                         <button id="get_node_bt">get node list</button>
-                    </div>
+                    
                 <br>
                 <span id="node_list_span"></span>
                 <br>
             </div>
         </div>
-        
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="{{url_for("static", filename="index.js")}}"></script>
     </body>

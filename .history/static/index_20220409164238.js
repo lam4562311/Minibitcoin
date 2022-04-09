@@ -49,13 +49,11 @@ function formSubmit(event) {
                 register_node_span.innerHTML = JSON.stringify(response);
         },
         200: function(response) {
-            alert(JSON.stringify(response.messages));
-            register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
+            alert(JSON.stringify(response));
         },
       statusCode: {
         400: function(response) {
-            alert(JSON.stringify(response.messages));
-            register_node_span.innerHTML = "Total ndoe: "+JSON.stringify(response.total_nodes);
+            alert(JSON.stringify(response));
         },
     }
 }
