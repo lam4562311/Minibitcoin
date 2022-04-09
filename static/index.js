@@ -118,6 +118,8 @@ function mining(event){
     });
 }
 
+
+
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
 $(get_status_bt).click(()=>get_status());

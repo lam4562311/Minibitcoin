@@ -214,9 +214,10 @@ class Blockchain:       #Blockchain
             current_block = Block(block['index'],
                                   block['transactions'],
                                   block['timestamp'],
-                                  block['previous_hash'],
-                                  block['hash'],
-                                  block['nonce'])
+                                  block['previous_hash'])
+            
+            current_block.hash =  block['hash']
+            current_block.nonce=  block['nonce']
             if current_index + 1 < len(chain) :
                 if current_block.compute_hash() != json.loads(chain[current_index + 1])[ 'previous_hash']:
                     return False
@@ -289,7 +290,7 @@ class Blockchain:       #Blockchain
         nodes.append(self_address)
         transactions =[]
         for node in nodes:
-            response = requests.get('http://'+ node +'/get_transactions')
+            response = requests.get('http://'+ node +'/consensusget_transactions')
             if response.status_code == 200:
                 t= response.json()['transactions']
                 for it in t:

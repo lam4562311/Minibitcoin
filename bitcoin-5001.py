@@ -61,7 +61,7 @@ def get_nodes():
     response = {'nodes' : nodes}
     return jsonify(response), 200
 
-@app.route('/register_node', methods=['PoST'])
+@app.route('/register_node', methods=['POST'])
 def register_node():
     values = request.form
     node = values.get('node')
@@ -109,6 +109,7 @@ def consensus():
 
 @app.route('/mine', methods=[ 'GET'])
 def mine():
+    blockchain.boardcast_transactions(request.host)
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
         requests.get('http://' + node + '/consensus' )
@@ -145,6 +146,24 @@ def get_status():
         'balance': blockchain.get_balance(myWallet.identity)
     }
     return jsonify(response),200
+
+@app.route('/update_balance', methods=['PUT'])
+def update_balance():
+    myWallet.balance = blockchain.get_balance(myWallet.identity)
+    response = {'message': 'Balance updated'}
+    return jsonify(response), 200
+
+@app.route('/sync_transactions', methods=['GET'])
+def sync_transactions():
+    result = blockchain.boardcast_transactions(request.host)
+    if result:
+        response = {
+            'message': 'Synchronized Transactions'
+        }
+    else:
+        resonse = {'message': 'False'}
+    return jsonify(resonse), 200
+
 @app.route('/')
 def index():
     return render_template('homepage.html')
