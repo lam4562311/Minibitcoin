@@ -100,7 +100,7 @@ function transactionSubmit(event) {
                 alert(JSON.stringify(response));
             },
             406: function(response) {
-                alert(JSON.stringify(response.message));
+                alert(JSON.parse(response.responseText).message);
             },
         }
     });
