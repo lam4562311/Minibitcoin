@@ -87,7 +87,7 @@ function transactionSubmit(event) {
         data:$('#transaction_form').serialize(),
         statusCode: {
             201: function(response) {
-                register_node_span.innerHTML = JSON.stringify(response.message);
+                transcation_submit_span.innerHTML = JSON.stringify(response.message);
             },
             400: function(response) {
                 alert(JSON.stringify(response));
