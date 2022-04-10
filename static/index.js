@@ -7,13 +7,11 @@ let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
 let register_node_span = document.querySelector("#register_node_span")
 let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit)
-let transaction_submit_span = document.querySelector("#transaction_submit_span")
+let transaction_submit_span = document.getElementById("#transcation_submit_span")
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
 let status_span = document.querySelector("#status_span")
 let publickey_span = document.querySelector("#publickey_span")
 let mining_result_span = document.querySelector("#mining_result")
-
-let generate_new_wallet_bt = document.querySelector("#generate_new_wallet_bt");
 
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
@@ -61,15 +59,10 @@ function get_status(){
 
 function formSubmit(event) {
     event.preventDefault();
-    
-    input = $('#Register_form :input').serializeArray()
-
-    
-
     $.ajax({
         url : "/register_node",
         type: 'post',
-        data: "node=" + input[0].value + ':' + input[1].value,
+        data:$('#Register_form').serialize(),
         statusCode: {
             200: function(response) {
                 register_node_span.innerHTML = JSON.stringify(response);
@@ -93,16 +86,20 @@ function transactionSubmit(event) {
         type: 'post',
         data:$('#transaction_form').serialize(),
         statusCode: {
+            406: function(response) {
+                alert(JSON.stringify(response));
+            },
             201: function(response) {
-                transaction_submit_span.innerHTML = JSON.stringify(response.message);
+                transcation_submit_span.innerHTML = JSON.stringify(response.message);
             },
             400: function(response) {
                 alert(JSON.stringify(response));
             },
-            406: function(response) {
-                alert(JSON.stringify(response.message));
-            },
-        }
+            500: function(response) {
+                alert("error");
+            }
+        },
+        
     });
 }
 
@@ -114,20 +111,18 @@ function mining(event){
         dataType: 'json',
         success: (data) => {
             mining_result_span.innerHTML = JSON.stringify(data);
+            $.ajax({
+                type: "PUT",
+                url: "/update_balance",
+                success: (data1) => {
+                    alert(JSON.stringify(data1));
+                }
+            });
         }
     });
 }
 
-function generate_new_wallet(){
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url:"/generate_new_wallet",
-        success: (data) => {
-            alert("new wallet identity is generated");
-        }
-    });
-}
+
 
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
@@ -140,4 +135,3 @@ $(show_publickey).click(()=>{var x = document.getElementById("publickey_div").st
                                     document.getElementById("publickey_div").style.display = "none";
                                 }});
 $(mining_bt).click(()=>mining());
-$(generate_new_wallet_bt).click(()=>generate_new_wallet());

@@ -22,7 +22,7 @@
         }
         .publickey_div {
             width: 100%;
-            display: block;
+            display: none;
           }
         </style>
 </head>
@@ -61,20 +61,14 @@
                 <br>
                 <span id="node_list_span"></span>
                 <br>
-				
-        <!-- Start of Key-related section-->
-		<a href='/export_key'>Download Private Key</a>
+        <a href='/export_key'>Download Private Key</a>
 		
 		<form action = "/import_key" method = "POST" 
          enctype = "multipart/form-data">
-		 Upload Private Key
+		 Upload Key
          <input type = "file" name = "file" />
          <input type = "submit"/>
 		</form>
-		<button id="generate_new_wallet_bt">Generate New Wallet</button>
-		<br>
-		<!-- End of Key-related section-->
-		
         <p><strong>New Transaction</strong><br>
         </p>
         <form  method="post" id="transaction_form">
