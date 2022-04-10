@@ -6,8 +6,10 @@ let full_node_span = document.querySelector("#node_list_span")
 let hostname_span = document.querySelector("#hostname_span")
 let client_id_span = document.querySelector("#client_id_span")
 let register_node_span = document.querySelector("#register_node_span")
+
 let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit)
 let transaction_submit_span = document.querySelector("#transaction_submit_span")
+
 let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
 let status_span = document.querySelector("#status_span")
 let publickey_span = document.querySelector("#publickey_span")
@@ -93,16 +95,20 @@ function transactionSubmit(event) {
         type: 'post',
         data:$('#transaction_form').serialize(),
         statusCode: {
+            406: function(response) {
+                alert(JSON.stringify(response));
+            },
             201: function(response) {
                 transaction_submit_span.innerHTML = JSON.stringify(response.message);
             },
             400: function(response) {
                 alert(JSON.stringify(response));
             },
-            406: function(response) {
-                alert(JSON.stringify(response.message));
-            },
-        }
+            500: function(response) {
+                alert("error");
+            }
+        },
+        
     });
 }
 
