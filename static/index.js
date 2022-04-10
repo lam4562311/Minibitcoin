@@ -61,10 +61,15 @@ function get_status(){
 
 function formSubmit(event) {
     event.preventDefault();
+    
+    input = $('#Register_form :input').serializeArray()
+
+    
+
     $.ajax({
         url : "/register_node",
         type: 'post',
-        data:$('#Register_form').serialize(),
+        data: "node=" + input[0].value + ':' + input[1].value,
         statusCode: {
             200: function(response) {
                 register_node_span.innerHTML = JSON.stringify(response);
