@@ -113,7 +113,7 @@ def consensus():
 
 @app.route('/mine', methods=[ 'GET'])
 def mine():
-    blockchain.boardcast_transactions(request.host)
+    blockchain.broadcast_transactions(request.host)
     
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
@@ -160,7 +160,7 @@ def get_status():
 
 @app.route('/sync_transactions', methods=['GET'])
 def sync_transactions():
-    result = blockchain.boardcast_transactions(request.host)
+    result = blockchain.broadcast_transactions(request.host)
     if result:
         response = {
             'message': 'Synchronized Transactions'

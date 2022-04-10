@@ -282,7 +282,7 @@ class Blockchain:       #Blockchain
                     balance += float(unconfimed_tx['value'])
         return balance
     
-    def boardcast_transactions(self, self_address):
+    def broadcast_transactions(self, self_address):
         nodes = [node for node in self.nodes]
         nodes.append(self_address)
         transactions =[]
