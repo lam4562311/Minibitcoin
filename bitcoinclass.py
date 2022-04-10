@@ -231,7 +231,8 @@ class Blockchain:       #Blockchain
             current_block.hash =  block['hash']
             current_block.nonce=  block['nonce']
             if current_index + 1 < len(chain):
-                if current_block.compute_hash() != json.loads(chain[current_index + 1])['previous_hash']:
+                if current_block.compute_hash() != \
+                        json.loads(chain[current_index + 1])['previous_hash']:
                     return False
             if isinstance(current_block.transactions, list):
                 for transaction in current_block.transactions:
@@ -240,8 +241,8 @@ class Blockchain:       #Blockchain
                         continue
                     current_transaction = Transaction(transaction['sender'],
                                                       transaction['recipient'],
-                                                      transaction['value'],
-                                                      transaction['signature'])
+                                                      transaction['value'])
+                    current_transaction.signature = transaction['signature']
                     if not current_transaction.verify_transaction_signature():
                         return False
                     if not self.is_valid_proof(current_block, block['hash']):
