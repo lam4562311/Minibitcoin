@@ -66,10 +66,15 @@ class Transaction:          #Transaction
 
 class Wallet:       #Wallet
     def __init__(self):
+        self.generate_new()
+        
+    def generate_new(self):
         random = Crypto.Random.new().read
         self._private_key = RSA.generate(1024,random)
         self._public_key = self._private_key.publickey()
-        self.balance = 0.0
+        self.cached_balance = 0.0
+        return self.identity
+        
     def sign_transaction(self, transaction: Transaction) :
         signer = PKCS1_v1_5.new(self._private_key)
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
@@ -78,6 +83,7 @@ class Wallet:       #Wallet
     def import_key(self, input_key):
         self._private_key = RSA.import_key(input_key)
         self._public_key = self._private_key.publickey()
+        # TODO: (rescan transacations for balance) self.cached_balance = get_balance
 
     def export_key(self):
         return self._private_key.exportKey(format='DER')
@@ -93,10 +99,10 @@ class Wallet:       #Wallet
         return private_key.decode('ascii')
     
     def update_balance(self, value):
-        self.balance = value
+        self.cached_balance = value
     
     def get_balance(self):
-        return self.balance
+        return self.cached_balance
 class Block :       #Block
     def __init__(self, index, transactions, timestamp, previous_hash):
         self.index = index

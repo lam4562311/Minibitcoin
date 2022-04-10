@@ -134,6 +134,11 @@ def import_key():
     blob = f.read()
     myWallet.import_key(blob)
     return 'key imported successfully'
+    
+@app.route('/generate_new_wallet', methods=['POST'])
+def generate_new_wallet():
+    new = myWallet.generate_new()
+    return 'new wallet identity: ' + new
 
 @app.route('/export_key', methods=['GET'])
 def export_key():
@@ -154,7 +159,7 @@ def get_status():
 
 @app.route('/update_balance', methods=['PUT'])
 def update_balance():
-    myWallet.balance = blockchain.get_balance(myWallet.identity)
+    myWallet.cached_balance = blockchain.get_balance(myWallet.identity)
     response = {'message': 'Balance updated'}
     return jsonify(response), 200
 
