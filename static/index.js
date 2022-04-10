@@ -59,10 +59,59 @@ function get_status(){
 
 function formSubmit(event) {
     event.preventDefault();
+    input = $('#Register_form').serializeArray();
+    if(input[1].value!=""){
+        $.ajax({
+            url : "/register_node",
+            type: 'post',
+            data:{
+                "node": input[0].value,
+                "com_port": input[1].value
+        },
+            statusCode: {
+                200: function(response) {
+                    register_node_span.innerHTML = JSON.stringify(response);
+                },
+                201: function(response) {
+                    alert(JSON.stringify(response.message));
+                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                },
+                400: function(response) {
+                    alert(JSON.stringify(response.message));
+                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                },
+            }
+        });
+    }else{
+        $.ajax({
+            url : "/register_node",
+            type: 'post',
+            data:{
+                "node": input[0].value
+        },
+            statusCode: {
+                200: function(response) {
+                    register_node_span.innerHTML = JSON.stringify(response);
+                },
+                201: function(response) {
+                    alert(JSON.stringify(response.message));
+                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                },
+                400: function(response) {
+                    alert(JSON.stringify(response.message));
+                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                },
+            }
+        });
+    }
+    alert(input[0].value);
     $.ajax({
         url : "/register_node",
         type: 'post',
-        data:$('#Register_form').serialize(),
+        data:{
+            "node": input[0].value,
+            "com_port": tmp
+    },
         statusCode: {
             200: function(response) {
                 register_node_span.innerHTML = JSON.stringify(response);
