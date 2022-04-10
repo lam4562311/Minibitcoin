@@ -153,15 +153,10 @@ def export_key():
 def get_status():
     response ={
         'public_key' : myWallet.identity,
-        'balance': blockchain.get_balance(myWallet.identity)
+        'balance': str(blockchain.get_confirmed_balance(myWallet.identity))
+            + ' + (' + str(blockchain.get_unconfirmed_balance(myWallet.identity)) + ' unconfirmed)'
     }
     return jsonify(response),200
-
-@app.route('/update_balance', methods=['PUT'])
-def update_balance():
-    myWallet.cached_balance = blockchain.get_balance(myWallet.identity)
-    response = {'message': 'Balance updated'}
-    return jsonify(response), 200
 
 @app.route('/sync_transactions', methods=['GET'])
 def sync_transactions():
