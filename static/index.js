@@ -86,16 +86,20 @@ function transactionSubmit(event) {
         type: 'post',
         data:$('#transaction_form').serialize(),
         statusCode: {
+            406: function(response) {
+                alert(JSON.stringify(response));
+            },
             201: function(response) {
-                transcation_submit_span.innerHTML = JSON.stringify(response.message);
+                transcation_submit_span = JSON.stringify(response.message);
             },
             400: function(response) {
                 alert(JSON.stringify(response));
             },
-            406: function(response) {
-                alert(JSON.stringify(response.message));
-            },
-        }
+            500: function(response) {
+                alert("error");
+            }
+        },
+        
     });
 }
 
