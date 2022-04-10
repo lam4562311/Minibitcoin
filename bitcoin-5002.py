@@ -85,6 +85,7 @@ def register_node():
 
     replaced = blockchain.consensus()    
     if replaced:
+        app.logger.warning('replaced')
         response ={
         'message' : 'Longer authoritative chain found from peers, replacing ours' ,
         'total_nodes ' : [node for node in blockchain.nodes]}
@@ -104,7 +105,7 @@ def consensus():
             'message' : 'our chain was replaced', 
         }
     else:
-        app.logger.info('not replace')
+        app.logger.info('not replaced')
         response = {
         'message ' : 'our chain is authoritative',
         }
@@ -117,7 +118,6 @@ def mine():
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
         ans = requests.get('http://' + node + '/consensus')
-        app.logger.warning(ans.text)
     response = {
         'index' : newblock.index,
         'transactions' : newblock.transactions,
@@ -134,6 +134,11 @@ def import_key():
     blob = f.read()
     myWallet.import_key(blob)
     return 'key imported successfully'
+    
+@app.route('/generate_new_wallet', methods=['POST'])
+def generate_new_wallet():
+    new = myWallet.generate_new()
+    return 'new wallet identity: ' + new
 
 @app.route('/export_key', methods=['GET'])
 def export_key():
@@ -148,15 +153,10 @@ def export_key():
 def get_status():
     response ={
         'public_key' : myWallet.identity,
-        'balance': blockchain.get_balance(myWallet.identity)
+        'balance': str(blockchain.get_confirmed_balance(myWallet.identity))
+            + ' + (' + str(blockchain.get_unconfirmed_balance(myWallet.identity)) + ' unconfirmed)'
     }
     return jsonify(response),200
-
-@app.route('/update_balance', methods=['PUT'])
-def update_balance():
-    myWallet.balance = blockchain.get_balance(myWallet.identity)
-    response = {'message': 'Balance updated'}
-    return jsonify(response), 200
 
 @app.route('/sync_transactions', methods=['GET'])
 def sync_transactions():
