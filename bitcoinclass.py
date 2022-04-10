@@ -205,45 +205,11 @@ class Blockchain:       #Blockchain
         else:
             raise ValueError('Invalid URL')
 
-    def valid_chain(self,chain):
-        #check if a bockchain is valid
-        current_index = 0
-        chain = json.loads(chain)
-        while current_index < len(chain):
-            block = json.loads(chain[ current_index])
-            current_block = Block(block['index'],
-                                  block['transactions'],
-                                  block['timestamp'],
-                                  block['previous_hash'])
-            
-            current_block.hash =  block['hash']
-            current_block.nonce=  block['nonce']
-            if current_index + 1 < len(chain) :
-                if current_block.compute_hash() != json.loads(chain[current_index + 1])[ 'previous_hash']:
-                    return False
-            if isinstance( current_block.transactions, list):
-                for transaction in current_block.transactions:
-                    transaction = json.loads(transaction)
-                    if transaction['sender'] == 'Block_Reward':
-                        continue
-                    current_transaction = Transaction(transaction['sender'],
-                                                      transaction['recipient'],
-                                                      transaction['value'],
-                                                      transaction['signature'])
-                    if not current_transaction.verify_transaction_signature():
-                        return False
-                if not self.is_valid_proof(current_block, block['hash']):
-                    return False
-            current_index += 1
-            
-        return True
-
-
-    def consensus(self) :
-        """
-        Resolve conflicts between blockchain's nodes
-        by replacing our chain with the longest one in the network.
-        """
+    def consensus(self):
+        # """
+        # Resolve conflicts between blockchain's nodes
+        # by replacing our chain with the longest one in the network.
+        # """
         neighbours = self.nodes
         new_chain = None
         
@@ -258,16 +224,50 @@ class Blockchain:       #Blockchain
                 length = response.json()['length']
                 chain = response.json()['chain']
 
-            # Check if the length is longer and the chain is valid
-            if length > max_length and self.valid_chain(chain):
-                max_length = length
-                new_chain = chain
+                # Check if the length is longer and the chain is valid
+                if length > max_length and self.valid_chain(chain):
+                    max_length = length
+                    new_chain = chain
             # Replace our chain if we discovered a new，valid chain longer than ours
             if new_chain:
                 self.chain = json.loads(new_chain)
                 return True
             return False
 
+    
+    def valid_chain(self,chain):
+        #check if a bockchain is valid
+        current_index = 0
+        chain = json.loads(chain)
+        while current_index < len(chain):
+            block = json.loads(chain[current_index])
+            current_block = Block(block['index'],
+                                  block['transactions'],
+                                  block['timestamp'],
+                                  block['previous_hash'])
+            current_block.hash =  block['hash']
+            current_block.nonce=  block['nonce']
+            if current_index + 1 < len(chain):
+                if current_block.compute_hash() != json.loads(chain[current_index + 1])['previous_hash']:
+                    return False
+            if isinstance(current_block.transactions, list):
+                for transaction in current_block.transactions:
+                    transaction = json.loads(transaction)
+                    if transaction['sender'] == 'Block_Reward':
+                        continue
+                    current_transaction = Transaction(transaction['sender'],
+                                                      transaction['recipient'],
+                                                      transaction['value'],
+                                                      transaction['signature'])
+                    if not current_transaction.verify_transaction_signature():
+                        return False
+                    if not self.is_valid_proof(current_block, block['hash']):
+                        return False
+            current_index += 1
+            
+        return True
+    
+    
     def get_balance(self, address):
     #get the balance from the given address
         
