@@ -90,6 +90,7 @@ def register_node():
         'message' : 'Longer authoritative chain found from peers, replacing ours' ,
         'total_nodes ' : [node for node in blockchain.nodes]}
     else:
+        app.logger.warning('not replaced')
         response ={
         'message': 'New nodes have been added,but our chain is authoritative',
         'total_nodes' : [node for node in blockchain.nodes]
