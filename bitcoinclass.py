@@ -34,25 +34,9 @@ class Transaction:          #Transaction
     def verify_sender_balance(self, blockchain):
         if hasattr(self, 'sender') :
             balance = 0.0
-            print(blockchain.chain) # debug
-            for block_json in blockchain.chain: # 1: confirmed historical blocks
-                block = json.loads(block_json)
-                print("Block: " + json.dumps(block)) # debug
-                if len(block["transactions"]) > 0:
-                    for tx_json in block["transactions"]:
-                        tx = json.loads(tx_json)
-                        if tx["recipient"] == self.sender:
-                            balance += float(tx["value"])
-                        if tx["sender"] == self.sender:
-                            balance -= float(tx["value"])
             
-            if len(blockchain.unconfirmed_transactions) > 0: # 2: unconfirmed tx mempool
-                for unconfimed_tx_json in blockchain.unconfirmed_transactions: 
-                    unconfimed_tx = json.loads(unconfimed_tx_json)
-                    if unconfimed_tx["recipient"] == self.sender:
-                        balance += float(unconfimed_tx["value"])
-                    if unconfimed_tx["sender"] == self.sender:
-                        balance -= float(unconfimed_tx["value"])
+            balance += blockchain.get_confirmed_balance(self.sender)
+            balance += blockchain.get_unconfirmed_balance(self.sender)
                             
             print("Balance: " + str(balance) + " / sending: " + self.value) # debug
             if balance >= float(self.value):
@@ -66,10 +50,14 @@ class Transaction:          #Transaction
 
 class Wallet:       #Wallet
     def __init__(self):
+        self.generate_new()
+        
+    def generate_new(self):
         random = Crypto.Random.new().read
         self._private_key = RSA.generate(1024,random)
         self._public_key = self._private_key.publickey()
-        self.balance = 0.0
+        return self.identity
+        
     def sign_transaction(self, transaction: Transaction) :
         signer = PKCS1_v1_5.new(self._private_key)
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
@@ -92,11 +80,6 @@ class Wallet:       #Wallet
         private_key = binascii.hexlify( self._private_key.exportKey(format='DER'))
         return private_key.decode('ascii')
     
-    def update_balance(self, value):
-        self.balance = value
-    
-    def get_balance(self):
-        return self.balance
 class Block :       #Block
     def __init__(self, index, transactions, timestamp, previous_hash):
         self.index = index
@@ -268,12 +251,12 @@ class Blockchain:       #Blockchain
         return True
     
     
-    def get_balance(self, address):
-    #get the balance from the given address
-        
+    def get_confirmed_balance(self, address):
         balance = 0.0
+
         if len(self.chain) <= 0:
             return balance
+
         for block_json in self.chain:
             block = json.loads(block_json)
             transactions = block['transactions']
@@ -283,6 +266,20 @@ class Blockchain:       #Blockchain
                     balance -= (float(transaction['value']))
                 if transaction['recipient'] == address:
                     balance += float(transaction['value'])
+        return balance
+
+    def get_unconfirmed_balance(self, address):
+        balance = 0.0
+        
+        if len(self.unconfirmed_transactions) <= 0:
+            return balance
+
+        for unconfimed_tx_json in self.unconfirmed_transactions:
+                unconfimed_tx = json.loads(unconfimed_tx_json)
+                if unconfimed_tx['sender'] == address:
+                    balance -= (float(unconfimed_tx['value']))
+                if unconfimed_tx['recipient'] == address:
+                    balance += float(unconfimed_tx['value'])
         return balance
     
     def boardcast_transactions(self, self_address):
