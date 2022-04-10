@@ -215,7 +215,7 @@ class Blockchain:       #Blockchain
             if new_chain:
                 self.chain = json.loads(new_chain)
                 return True
-            return False
+        return False
 
     
     def valid_chain(self,chain):
