@@ -85,6 +85,7 @@ def register_node():
 
     replaced = blockchain.consensus()    
     if replaced:
+        app.logger.warning('replaced')
         response ={
         'message' : 'Longer authoritative chain found from peers, replacing ours' ,
         'total_nodes ' : [node for node in blockchain.nodes]}
@@ -104,7 +105,7 @@ def consensus():
             'message' : 'our chain was replaced', 
         }
     else:
-        app.logger.info('not replace')
+        app.logger.info('not replaced')
         response = {
         'message ' : 'our chain is authoritative',
         }
@@ -117,7 +118,6 @@ def mine():
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
         ans = requests.get('http://' + node + '/consensus')
-        app.logger.warning(ans.text)
     response = {
         'index' : newblock.index,
         'transactions' : newblock.transactions,
