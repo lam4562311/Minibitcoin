@@ -104,28 +104,6 @@ function formSubmit(event) {
             }
         });
     }
-    alert(input[0].value);
-    $.ajax({
-        url : "/register_node",
-        type: 'post',
-        data:{
-            "node": input[0].value,
-            "com_port": tmp
-    },
-        statusCode: {
-            200: function(response) {
-                register_node_span.innerHTML = JSON.stringify(response);
-            },
-            201: function(response) {
-                alert(JSON.stringify(response.message));
-                register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
-            },
-            400: function(response) {
-                alert(JSON.stringify(response.message));
-                register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
-            },
-        }
-    });
 }
 
 function transactionSubmit(event) {

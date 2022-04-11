@@ -67,13 +67,14 @@ def register_node():
     values = request.form
     node = values.get('node')
     com_port = values.get('com_port')
-    if com_port is not None:
-        blockchain.register_node(request.remote_addr + ":" + com_port)
-        return "ok", 200
     if node is None and com_port is None:
         return "Error: Please supply a valid list of nodes", 400
-    
-    blockchain.register_node(node)
+    if com_port is not None:
+        blockchain.register_node(request.remote_addr + ":" + com_port)
+        node = request.remote_addr + ":" + com_port
+        app.logger.warning(node)
+    else:
+        blockchain.register_node(node)
     node_list = requests.get('http://' + node + '/get_nodes')
     if node_list.status_code == 200:
         node_list = node_list.json()['nodes']
@@ -118,6 +119,7 @@ def mine():
     newblock = blockchain.mine(myWallet)
     for node in blockchain.nodes:
         ans = requests.get('http://' + node + '/consensus')
+        app.logger.info(ans)
     response = {
         'index' : newblock.index,
         'transactions' : newblock.transactions,
