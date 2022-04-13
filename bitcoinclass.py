@@ -126,6 +126,7 @@ class Blockchain:       #Blockchain
     def __init__(self):
         self.unconfirmed_transactions = []
         self.chain = []
+        self.interest_rate = 0.012
         self.create_genesis_block()
 
     def create_genesis_block( self):
@@ -168,6 +169,15 @@ class Blockchain:       #Blockchain
         return computed_hash
     
     def mine(self, mywallet) :
+        
+        transaction_num = len(self.chain)
+        if (transaction_num %10 == 0 and transaction_num):
+            address_list = self.get_address_list()
+            interest_list = self.interest(address_list)
+            if len(interest_list):
+                for item in interest_list:
+                    self.unconfirmed_transactions.append(item.to_json())
+        
         block_reward = Transaction( "Block_Reward" ,
                                     mywallet.identity, "5.0" ).to_json()
         self.unconfirmed_transactions.insert(0, block_reward)
@@ -253,7 +263,7 @@ class Blockchain:       #Blockchain
             if isinstance(current_block.transactions, list):
                 for transaction in current_block.transactions:
                     transaction = json.loads(transaction)
-                    if transaction['sender'] == 'Block_Reward':
+                    if transaction['sender'] == 'Block_Reward' or transaction['sender'] == 'interest':
                         continue
                     current_transaction = Transaction(transaction['sender'],
                                                       transaction['recipient'],
@@ -297,3 +307,27 @@ class Blockchain:       #Blockchain
                     transactions.append(it)
         self.unconfirmed_transactions=transactions
         return True
+
+    def get_address_list(self):
+        address_list = []
+        for item in self.chain:
+            block = json.loads(item)
+            transactions = block['transactions']
+            for it in transactions:
+                transaction = json.loads(it)
+                if transaction['sender'] not in address_list and transaction['sender'] =='Block_Reward' and transaction['sender'] =='interest':
+                    address_list.append(transaction['sender'])
+                if transaction['recipient'] not in address_list:
+                    address_list.append(transaction['recipient'])
+        return address_list
+
+    def interest(self, address_list):
+        interest_list = []
+        if not len(address_list):
+            return interest_list
+        for item in address_list:
+            cur_balance = self.get_balance(item)
+            interest = self.interest_rate * cur_balance
+            interest_list.append(Transaction("interest",item, interest))
+        return interest_list
+            

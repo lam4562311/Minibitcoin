@@ -73,16 +73,21 @@ def register_node():
         blockchain.register_node(request.remote_addr + ":" + com_port)
         node = request.remote_addr + ":" + com_port
         app.logger.warning(node)
+        node_list = requests.get('http://' + node + '/get_nodes')
+        if node_list.status_code == 200:
+            node_list = node_list.json()['nodes']
+            for node in node_list:
+                blockchain.register_node(node)
     else:
         blockchain.register_node(node)
-    node_list = requests.get('http://' + node + '/get_nodes')
-    if node_list.status_code == 200:
-        node_list = node_list.json()['nodes']
-        for node in node_list:
-            blockchain.register_node( node)
+        node_list = requests.get('http://' + node + '/get_nodes')
+        if node_list.status_code == 200:
+            node_list = node_list.json()['nodes']
+            for node in node_list:
+                blockchain.register_node(node)
         
-    for new_nodes in blockchain.nodes:
-        requests.post( 'http://' + new_nodes + '/register_node' , data={'com_port':str(port)})
+        for new_nodes in blockchain.nodes:
+            requests.post( 'http://' + new_nodes + '/register_node' , data={'com_port':str(port)})
 
     replaced = blockchain.consensus()    
     if replaced:
@@ -178,6 +183,6 @@ def index():
 if __name__ == '__main__':
     myWallet = Wallet()
     blockchain = Blockchain()
-    port = 5001
+    port = 5000
     app.logger.setLevel(logging.DEBUG)
     app.run(host='127.0.0.1', port=port, debug = True)
