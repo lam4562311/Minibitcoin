@@ -15,8 +15,14 @@ class Transaction:          #Transaction
         self.sender = sender
         self.recipient = recipient
         self.value = value
+        self.rate = 0.012
+        if(sender=='Block_Reward' or sender=='interest'):
+            self.fee = str(0)
+        else:
+            self.fee = str(float(self.value)*float(self.rate))
+
     def to_dict(self):
-        return ({'sender': self.sender , 'recipient': self.recipient, 'value': self.value})
+        return ({'sender': self.sender , 'recipient': self.recipient, 'value': self.value, 'fee': self.fee})
 
     def add_signature(self, signature_):
         self.signature = signature_
@@ -44,7 +50,7 @@ class Transaction:          #Transaction
                         if tx["recipient"] == self.sender:
                             balance += float(tx["value"])
                         if tx["sender"] == self.sender:
-                            balance -= float(tx["value"])
+                            balance -= (float(tx["value"])+float(tx['fee']))
             
             if len(blockchain.unconfirmed_transactions) > 0: # 2: unconfirmed tx mempool
                 for unconfimed_tx_json in blockchain.unconfirmed_transactions: 
@@ -52,7 +58,7 @@ class Transaction:          #Transaction
                     if unconfimed_tx["recipient"] == self.sender:
                         balance += float(unconfimed_tx["value"])
                     if unconfimed_tx["sender"] == self.sender:
-                        balance -= float(unconfimed_tx["value"])
+                        balance -= (float(unconfimed_tx["value"])+float(unconfimed_tx['fee']))
                             
             print("Balance: " + str(balance) + " / sending: " + self.value) # debug
             if balance >= float(self.value):
@@ -282,7 +288,7 @@ class Blockchain:       #Blockchain
     #get the balance from the given address
         
         balance = 0.0
-        if len(self.chain) <= 0:
+        if not len(self.chain):
             return balance
         for block_json in self.chain:
             block = json.loads(block_json)
@@ -290,7 +296,7 @@ class Blockchain:       #Blockchain
             for transaction_json in transactions:
                 transaction = json.loads(transaction_json)
                 if transaction['sender'] == address:
-                    balance -= (float(transaction['value']))
+                    balance -= (float(transaction['value'])+float(transaction['fee']))
                 if transaction['recipient'] == address:
                     balance += float(transaction['value'])
         return balance

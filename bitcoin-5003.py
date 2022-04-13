@@ -183,6 +183,6 @@ def index():
 if __name__ == '__main__':
     myWallet = Wallet()
     blockchain = Blockchain()
-    port = 5000
+    port = 5003
     app.logger.setLevel(logging.DEBUG)
     app.run(host='127.0.0.1', port=port, debug = True)
