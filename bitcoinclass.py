@@ -61,7 +61,7 @@ class Transaction:          #Transaction
                         balance -= (float(unconfimed_tx["value"])+float(unconfimed_tx['fee']))
                             
             print("Balance: " + str(balance) + " / sending: " + self.value) # debug
-            if balance >= float(self.value):
+            if balance >= (float(self.value)+float(self.fee)):
                 return True
         return False
             
