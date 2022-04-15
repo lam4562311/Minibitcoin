@@ -133,6 +133,13 @@ def mine():
         'hash' : newblock.hash,
         'previous_hash' : newblock.previous_hash
     }
+    
+    result = blockchain.difficulty_calculation(request.host)
+    app.logger.warning(result)
+    for node in blockchain.nodes:
+        requests.get('http://' + node + '/sync_difficulty_info')
+    requests.get('http://' + request.host + '/sync_difficulty_info')
+
     return jsonify( response), 200
 
 @app.route('/import_key', methods=['POST'])
@@ -175,6 +182,21 @@ def sync_transactions():
     else:
         resonse = {'message': 'False'}
     return jsonify(resonse), 200
+
+@app.route('/sync_difficulty_info', methods=['GET'])
+def sync_difficulty_info():
+    result = blockchain.sync_difficulty(request.host)
+    if result:
+        response= {'message': 'Synchronized Difficulty Info'}
+        return jsonify(response), 200
+    else:
+        response= {'message': 'Fail to Synchronize Difficulty Info'}
+        return jsonify(response), 406
+
+@app.route('/difficulty_info', methods=['GET'])
+def difficulty_info():
+    response= blockchain.difficulty_info
+    return jsonify(response), 200
 
 @app.route('/')
 def index():

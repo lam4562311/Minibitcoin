@@ -1,17 +1,19 @@
 let get_chain_bt = document.querySelector("#get_chain_bt");
 let get_node_bt = document.querySelector("#get_node_bt");
+let get_diff_info_bt = document.querySelector("#get_diff_info_bt");
 
-let full_chain_span = document.querySelector("#fullchain_span")
-let full_node_span = document.querySelector("#node_list_span")
-let hostname_span = document.querySelector("#hostname_span")
-let client_id_span = document.querySelector("#client_id_span")
-let register_node_span = document.querySelector("#register_node_span")
-let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit)
-let transaction_submit_span = document.getElementById("#transcation_submit_span")
-let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit)
-let status_span = document.querySelector("#status_span")
-let publickey_span = document.querySelector("#publickey_span")
-let mining_result_span = document.querySelector("#mining_result")
+let full_chain_span = document.querySelector("#fullchain_span");
+let full_node_span = document.querySelector("#node_list_span");
+let hostname_span = document.querySelector("#hostname_span");
+let client_id_span = document.querySelector("#client_id_span");
+let register_node_span = document.querySelector("#register_node_span");
+let Register_node_submit_listener = document.getElementById("Register_form").addEventListener("submit", formSubmit);
+let transaction_submit_span = document.getElementById("#transcation_submit_span");
+let transaction_submit_listener = document.getElementById("transaction_form").addEventListener("submit", transactionSubmit);
+let status_span = document.querySelector("#status_span");
+let publickey_span = document.querySelector("#publickey_span");
+let mining_result_span = document.querySelector("#mining_result");
+let diff_info_span = document.querySelector("#diff_info_span");
 
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
@@ -149,7 +151,17 @@ function mining(event){
     });
 }
 
-
+function get_diff_info(event){
+    $.ajax({
+        url: '/difficulty_info',
+        type: "GET",
+        contentType: "application/json; charset: utf-8",
+        dataType: "json",
+        success: (data) => {
+            diff_info_span.innerHTML = JSON.stringify(data);
+        }
+    })
+}
 
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
@@ -162,3 +174,4 @@ $(show_publickey).click(()=>{var x = document.getElementById("publickey_div").st
                                     document.getElementById("publickey_div").style.display = "none";
                                 }});
 $(mining_bt).click(()=>mining());
+$(get_diff_info_bt).click(()=>get_diff_info());

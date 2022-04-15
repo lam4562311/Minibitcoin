@@ -104,20 +104,22 @@ class Wallet:       #Wallet
     def get_balance(self):
         return self.balance
 class Block :       #Block
-    def __init__(self, index, transactions, timestamp, previous_hash):
+    def __init__(self, index, transactions, timestamp, previous_hash, difficulty):
         self.index = index
         self.transactions = transactions
         self.timestamp = timestamp
         self.previous_hash = previous_hash
         self.hash = None
         self.nonce = 0
+        self.difficulty = difficulty
     def to_dict(self):
         return ({
             'index' : self.index,
             'transactions' : self.transactions,
             'timestamp' : self.timestamp,
             'previous_hash' : self.previous_hash,
-            'nonce' : self.nonce}
+            'nonce' : self.nonce,
+            'difficulty': self.difficulty}
         )
     def to_json(self):
         return json.dumps (self.__dict__)
@@ -126,7 +128,7 @@ class Block :       #Block
 
 
 class Blockchain:       #Blockchain
-    difficulty = 2
+    
     nodes=set()
     
     def __init__(self):
@@ -134,12 +136,19 @@ class Blockchain:       #Blockchain
         self.chain = []
         self.interest_rate = 0.012
         self.create_genesis_block()
+        self.difficulty_info = {'difficulty':3,
+                                'accumulated_blocks_length':len(self.chain),
+                                'previous_time_spent': None,
+                                'current_time_spent': 0,
+                                'timestamp': datetime.datetime.now()}
 
     def create_genesis_block( self):
+        difficulty = 3
         genesis_block = Block(0, [], datetime.datetime.now()
-                                .strftime("%m/%d/%Y, %H:%M:%S"),"0")
+                                .strftime("%m/%d/%Y, %H:%M:%S"),"0", difficulty)
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block.to_json())
+
     def add_new_transaction(self, transaction: Transaction):
         if transaction.verify_transaction_signature() and transaction.verify_sender_balance(self):
             self.unconfirmed_transactions.append(transaction.to_json())
@@ -163,18 +172,19 @@ class Blockchain:       #Blockchain
 
     def is_valid_proof(self, block, block_hash):
 
-        return (block_hash.startswith( '0' * Blockchain.difficulty) and
+        return (block_hash.startswith( '0' * block.difficulty) and
                 block_hash == block.compute_hash())
 
     def proof_of_work(self, block ):
         block.nonce = 0
         computed_hash = block.compute_hash()
-        while not computed_hash.startswith( '0' * Blockchain.difficulty):
+        while not computed_hash.startswith( '0' * block.difficulty):
             block.nonce += 1
             computed_hash = block.compute_hash()
         return computed_hash
     
     def mine(self, mywallet) :
+        init = datetime.datetime.now()
         
         transaction_num = len(self.chain)
         if (transaction_num %10 == 0 and transaction_num):
@@ -194,11 +204,18 @@ class Blockchain:       #Blockchain
                             transactions=self.unconfirmed_transactions,
                             timestamp=datetime.datetime.now()
                             .strftime("%m/%d/%Y, %H:%M:%S"),
-                            previous_hash=self.last_block['hash'])
+                            previous_hash=self.last_block['hash'],
+                            difficulty=self.difficulty_info['difficulty'])
 
         proof = self.proof_of_work(new_block)
         if self.add_block(new_block, proof):
             self.unconfirmed_transactions = []
+            
+            now = datetime.datetime.now()
+            self.difficulty_info['accumulated_blocks_length'] = len(self.chain)
+            self.difficulty_info['current_time_spent'] += (now - init).total_seconds()
+            self.difficulty_info['timestamp'] = now
+            
             return new_block
         else:
             return False
@@ -260,7 +277,8 @@ class Blockchain:       #Blockchain
             current_block = Block(block['index'],
                                   block['transactions'],
                                   block['timestamp'],
-                                  block['previous_hash'])
+                                  block['previous_hash'],
+                                  block['difficulty'])
             current_block.hash =  block['hash']
             current_block.nonce=  block['nonce']
             if current_index + 1 < len(chain):
@@ -336,4 +354,42 @@ class Blockchain:       #Blockchain
             interest = self.interest_rate * cur_balance
             interest_list.append(Transaction("interest",item, interest))
         return interest_list
-            
+
+    def sync_difficulty(self,address):
+        record_list=[]
+        timestamp_list =[]
+        response = requests.get('http://' + address + '/difficulty_info')
+        if response.status_code == 200:
+            record = response.json()
+            record_list.append(record)
+            timestamp_list.append(record['timestamp'])
+        for node in self.nodes:
+            response = requests.get('http://' + node + '/difficulty_info')
+            if response.status_code == 200:
+                record = response.json()
+                record_list.append(record)
+                timestamp_list.append(record['timestamp'])
+        latest_record = record_list[timestamp_list.index(max(timestamp_list))]
+        self.difficulty_info = latest_record
+        return True
+    
+    def difficulty_calculation(self,address):
+        response = (requests.get('http://' + address + '/difficulty_info')).json()
+        spent_time_percent=None
+        if response['accumulated_blocks_length'] % 5 == 0:
+            if self.difficulty_info['previous_time_spent'] == None:
+                self.difficulty_info['difficulty'] = 3
+            else:
+                time_difference = self.difficulty_info['current_time_spent'] - self.difficulty_info['previous_time_spent']
+                spent_time_percent = time_difference / self.difficulty_info['previous_time_spent']
+                
+                if abs(spent_time_percent) <= 5 and self.difficulty_info['difficulty'] <= 5:
+                    self.difficulty_info['difficulty'] += 1
+                elif abs(spent_time_percent) > 5 and (self.difficulty_info['difficulty'] >= 1):
+                    self.difficulty_info['difficulty'] -= 1
+            self.difficulty_info['previous_time_spent'] = response['current_time_spent']
+            self.difficulty_info['current_time_spent'] = 0
+            self.difficulty_info['timestamp'] = response['timestamp']
+            return spent_time_percent
+
+                
