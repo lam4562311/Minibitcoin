@@ -131,7 +131,8 @@ def mine():
         'timestamp' : newblock.timestamp,
         'nonce' : newblock.nonce,
         'hash' : newblock.hash,
-        'previous_hash' : newblock.previous_hash
+        'previous_hash' : newblock.previous_hash,
+        'merkle_tree_root': newblock.merkle_tree_root
     }
     
     result = blockchain.difficulty_calculation(request.host)

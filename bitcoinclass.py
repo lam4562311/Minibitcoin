@@ -1,3 +1,4 @@
+from hashlib import sha256
 import Crypto 
 import Crypto.Random
 from Crypto.PublicKey import RSA
@@ -112,6 +113,8 @@ class Block :       #Block
         self.hash = None
         self.nonce = 0
         self.difficulty = difficulty
+        self.merkle_tree_root = ""
+        
     def to_dict(self):
         return ({
             'index' : self.index,
@@ -119,13 +122,41 @@ class Block :       #Block
             'timestamp' : self.timestamp,
             'previous_hash' : self.previous_hash,
             'nonce' : self.nonce,
-            'difficulty': self.difficulty}
+            'difficulty': self.difficulty,
+            'merkle_tree_root': self.merkle_tree_root}
         )
     def to_json(self):
         return json.dumps (self.__dict__)
+
     def compute_hash( self):
+        self.tree_root = self.get_tree_root()
         return SHA256.new(str(self.to_dict()).encode()).hexdigest()
 
+    def get_tree_root(self) -> str:
+        hashed_transactions = self.hash_transactions(self.transactions)
+        root = self.merkle_tree_root_recur(hashed_transactions)
+        return root
+
+    def hash_transactions(self, transactions):
+        return [SHA256.new(str(transaction).encode()).hexdigest() for transaction in transactions]
+    
+    def merkle_tree_root_recur(self,leaves):
+        if len(leaves) <=1:
+            return leaves[0]
+        roots = []
+        index = 0
+        while index < len(leaves):
+            left = leaves[index]
+            right = leaves[index + 1] if index + 1 < len(leaves) else leaves[index]
+            root = self.sum_of_hash(left, right)
+            roots.append(root)
+            index += 2
+        return self.merkle_tree_root_recur(roots)
+    
+    def sum_of_hash(self,left,right):
+        left = str(left).encode()
+        right = str(right).encode()
+        return sha256(left+right).hexdigest()
 
 class Blockchain:       #Blockchain
     
@@ -392,4 +423,51 @@ class Blockchain:       #Blockchain
             self.difficulty_info['timestamp'] = response['timestamp']
             return spent_time_percent
 
-                
+    def merkle_tree_path(self, transaction: Transaction):
+        path = []
+        transactions_hash = sha256(str(transaction.to_json()).encode()).hexdigest()
+        block = self.search_block(transactions_hash)
+        leaves = []
+        if block:
+            for transactions in block['trnasactions']:
+                transaction = json.loads(transactions)
+                new_transaction = Transaction(transaction['sender'], transaction['recipient'], transaction['value'])
+                new_transaction_hash = sha256(str(new_transaction.to_json()).encode()).hexdigest()
+                leaves.append(new_transaction_hash)
+            path = self.merkle_tree_path_recure(leaves,transactions_hash,[])
+
+    def search_block(self,transactions_hash):
+        fullchain = [json.loads(block) for block in self.chain]
+        for block in fullchain[::-1]:
+            for transactions in block['trnasactions']:
+                transaction = json.loads(transactions)
+                new_transaction = Transaction(transaction['sender'], transaction['recipient'], transaction['value'])
+                new_transaction_hash = sha256(str(new_transaction.to_json()).encode()).hexdigest()
+                if transactions_hash == new_transaction_hash:
+                    return block        
+        return False
+    
+    def merkle_tree_path_recure(self,leaves, position, path):
+        if len(leaves) <= 1:
+            return path
+        roots = []
+        next = ""
+        index = 0
+        while index < len(leaves):
+            left = leaves[index]
+            right = leaves[index + 1] if index + 1 < len(leaves) else leaves[index]
+            root = self.sum_of_hash(left, right)
+            roots.append(root)
+            if left == position:
+                path.append(['0',left])
+                next = root
+            elif right == position:
+                path.append(['1',right])
+                next = root
+            index += 2
+        return self.merkle_tree_path_recure(roots, next,path)
+    
+    def sum_of_hash(self,left,right):
+        left = str(left).encode()
+        right = str(right).encode()
+        return sha256(left+right).hexdigest()
