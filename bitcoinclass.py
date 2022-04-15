@@ -339,7 +339,7 @@ class Blockchain:       #Blockchain
             transactions = block['transactions']
             for it in transactions:
                 transaction = json.loads(it)
-                if transaction['sender'] not in address_list and transaction['sender'] =='Block_Reward' and transaction['sender'] =='interest':
+                if transaction['sender'] not in address_list and transaction['sender'] !='Block_Reward' and transaction['sender'] !='interest':
                     address_list.append(transaction['sender'])
                 if transaction['recipient'] not in address_list:
                     address_list.append(transaction['recipient'])
