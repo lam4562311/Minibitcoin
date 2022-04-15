@@ -54,6 +54,7 @@ function get_status(){
             success: (data) => {
                 status_span.innerHTML = "Balance: "+JSON.stringify(data.balance);
                 publickey_span.innerHTML = "Public Key: \n"+JSON.stringify(data.public_key);
+                document.getElementById("publickey_div").style.display = "none";
             } 
         }
     );
