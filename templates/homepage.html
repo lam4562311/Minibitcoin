@@ -48,7 +48,9 @@
     #get_chain_bt,
     #get_diff_info_bt,
     #get_status_bt,
-    #show_publickey{
+    #show_publickey,
+    #show_manage_privkey,
+    #generate_new_wallet_bt {
       border-radius: 5px;
     }
     
@@ -62,7 +64,11 @@
       text-decoration: none;
     }
 
-    #publickey_span{
+    #publickey_span {
+        display: none;
+    }
+
+    #manage_privatekey {
         display: none;
     }
     
@@ -84,15 +90,20 @@
       <span id="publickey_span"></span>
     </div>
     <button id="show_publickey">Show / Hide Publickey</button>
+    <button id="show_manage_privkey">Manage Private Key</button>
     <br>
-    <a href='/export_key'>Export Private Key</a>
-
+    
+    <div id="manage_privatekey">
+    <form action="/export_key">
+        <input type="submit" value="Export Private Key" />
+    </form>
     <form action="/import_key" method="POST" enctype="multipart/form-data">
       Import Private Key
       <input type="file" name="file" />
       <input type="submit" />
     </form>
     <button id="generate_new_wallet_bt">Generate New Wallet Identity</button>
+    </div>
 
     <hr>
     <p><strong>Register client node</strong><br>

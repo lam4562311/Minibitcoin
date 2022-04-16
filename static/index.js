@@ -178,6 +178,7 @@ function generate_new_wallet(){
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
 $(show_publickey).click(() => $("#publickey_span").toggle());
+$("#show_manage_privkey").click(() => $("#manage_privatekey").toggle());
 $(mining_bt).click(()=>mining());
 $(get_diff_info_bt).click(()=>get_diff_info());
 $(generate_new_wallet_bt).click(()=>generate_new_wallet());
