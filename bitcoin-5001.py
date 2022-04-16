@@ -19,7 +19,19 @@ def new_transaction():
     required = ['recipient_address', 'amount']
     if not all(k in values for k in required):
         return 'Missing values', 400
-    
+    public_key_list =[]
+    for node in blockchain.nodes:
+        result = requests.get('http://' + node + '/get_status')
+        if result.status_code == 200:
+            result = result.json()['public_key']
+            public_key_list.append(result)
+        
+    if values['recipient_address'] not in public_key_list:
+        app.logger.warning(public_key_list)
+        response = {'message': 'Invalid Transaction!'}
+        return jsonify(response), 406
+
+            
     #Create a new Transaction
     transaction = Transaction(myWallet.identity, values['recipient_address'], values[ 'amount'])
     transaction.add_signature(myWallet.sign_transaction(transaction))
