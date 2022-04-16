@@ -186,6 +186,8 @@ class Blockchain:       #Blockchain
         return computed_hash
     
     def mine(self, mywallet) :
+        self.boardcast_transactions() # retrieve TXs and sync mempool with neighboring nodes before creating interest / Block_reward
+
         init = datetime.datetime.now()
         
         transaction_num = len(self.chain)
@@ -199,8 +201,6 @@ class Blockchain:       #Blockchain
         block_reward = Transaction( "Block_Reward" ,
                                     mywallet.identity, "5.0" ).to_json()
         self.unconfirmed_transactions.insert(0, block_reward)
-
-        self.boardcast_transactions()
 
         if not self.unconfirmed_transactions:
             return False
