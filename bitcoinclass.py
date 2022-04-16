@@ -11,7 +11,7 @@ import requests
 import datetime
 
 class Transaction:          #Transaction
-    def __init__(self, sender,recipient,value):
+    def __init__(self, sender,recipient,value,rate=0,fee="",signature=""):
         self.sender = sender
         self.recipient = recipient
         self.value = value
@@ -20,6 +20,7 @@ class Transaction:          #Transaction
             self.fee = str(0)
         else:
             self.fee = str(float(self.value)*float(self.rate))
+        self.signature = signature
 
     def to_dict(self):
         return ({'sender': self.sender , 'recipient': self.recipient, 'value': self.value, 'fee': self.fee})
@@ -141,6 +142,10 @@ class Blockchain:       #Blockchain
             return True
         else:
             return False
+
+    def load_tx_json(self, tx_json : str):
+        tx = Transaction(**json.loads(tx_json))
+        return self.add_new_transaction(tx)
 
     def add_block( self, block, proof):
 
@@ -344,9 +349,9 @@ class Blockchain:       #Blockchain
         for node in nodes:
             response = requests.get('http://'+ node +'/get_transactions')
             if response.status_code == 200:
-                t = Transaction(response.json()['transactions'])
+                t = response.json()['transactions']
                 for it in t:
-                    self.add_new_transaction(it)
+                    self.load_tx_json(it)
         return True
 
     def get_address_list(self):

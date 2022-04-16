@@ -113,7 +113,7 @@ def consensus():
     else:
         app.logger.info('not replaced')
         response = {
-        'message ' : 'our chain is authoritative',
+        'message' : 'our chain is authoritative',
         }
     return jsonify(response), 200
 
