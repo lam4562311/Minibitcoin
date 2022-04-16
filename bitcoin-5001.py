@@ -198,10 +198,10 @@ def difficulty_info():
     response= blockchain.difficulty_info
     return jsonify(response), 200
 
-@app.route('/clear_transactions')
+@app.route('/clear_transactions', methods=['put'])
 def clear_transactions():
     blockchain.unconfirmed_transactions = []
-    return True, 200
+    return "True", 200
 
 @app.route('/')
 def index():

@@ -201,7 +201,7 @@ def difficulty_info():
 @app.route('/clear_transactions')
 def clear_transactions():
     blockchain.unconfirmed_transactions = []
-    return True, 200
+    return "True", 200
 
 @app.route('/')
 def index():
