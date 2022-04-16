@@ -14,6 +14,7 @@ let status_span = document.querySelector("#status_span");
 let publickey_span = document.querySelector("#publickey_span");
 let mining_result_span = document.querySelector("#mining_result");
 let diff_info_span = document.querySelector("#diff_info_span");
+let generate_new_wallet_bt = document.querySelector("#generate_new_wallet_bt");
 
 hostname_span.innerHTML = window.location.hostname;
 client_id_span.innerHTML = window.location.port;
@@ -164,6 +165,17 @@ function get_diff_info(event){
     })
 }
 
+function generate_new_wallet(){
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url:"/generate_new_wallet",
+        success: (data) => {
+            alert("new wallet identity is generated");
+        }
+    });
+}
+
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
 $(get_status_bt).click(()=>get_status());
@@ -176,3 +188,4 @@ $(show_publickey).click(()=>{var x = document.getElementById("publickey_div").st
                                 }});
 $(mining_bt).click(()=>mining());
 $(get_diff_info_bt).click(()=>get_diff_info());
+$(generate_new_wallet_bt).click(()=>generate_new_wallet());

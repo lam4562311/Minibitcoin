@@ -197,6 +197,11 @@ def clear_transactions():
     blockchain.unconfirmed_transactions = []
     return "True", 200
 
+@app.route('/generate_new_wallet', methods=['POST'])
+def generate_new_wallet():
+    new = myWallet.generate_new()
+    return 'new wallet identity: ' + new
+
 @app.route('/')
 def index():
     return render_template('homepage.html')

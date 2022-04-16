@@ -59,10 +59,15 @@ class Transaction:          #Transaction
 
 class Wallet:       #Wallet
     def __init__(self):
+        self.generate_new()
+
+    def generate_new(self):
         random = Crypto.Random.new().read
         self._private_key = RSA.generate(1024,random)
         self._public_key = self._private_key.publickey()
         self.balance = 0.0
+        return self.identity
+    
     def sign_transaction(self, transaction: Transaction) :
         signer = PKCS1_v1_5.new(self._private_key)
         h = SHA256.new(str(transaction.to_dict()).encode('utf8'))
