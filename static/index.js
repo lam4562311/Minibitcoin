@@ -64,27 +64,31 @@ function formSubmit(event) {
     event.preventDefault();
     input = $('#Register_form').serializeArray();
     if(input[1].value!=""){
-        $.ajax({
-            url : "/register_node",
-            type: 'post',
-            data:{
-                "node": input[0].value,
-                "com_port": input[1].value
-        },
-            statusCode: {
-                200: function(response) {
-                    register_node_span.innerHTML = JSON.stringify(response);
-                },
-                201: function(response) {
-                    alert(JSON.stringify(response.message));
-                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
-                },
-                400: function(response) {
-                    alert(JSON.stringify(response.message));
-                    register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
-                },
-            }
-        });
+        if (confirm("You are doing Type B node registration which uses com_port, are you sure? \n"
+            + "The recommended way to register a node is filing only the host field in the host:port format to do Type A node registration."))
+        {
+            $.ajax({
+                url : "/register_node",
+                type: 'post',
+                data:{
+                    "node": input[0].value,
+                    "com_port": input[1].value
+            },
+                statusCode: {
+                    200: function(response) {
+                        register_node_span.innerHTML = JSON.stringify(response);
+                    },
+                    201: function(response) {
+                        alert(JSON.stringify(response.message));
+                        register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                    },
+                    400: function(response) {
+                        alert(JSON.stringify(response.message));
+                        register_node_span.innerHTML = "Total node: "+JSON.stringify(response.total_nodes);
+                    },
+                }
+            });
+        }
     }else{
         $.ajax({
             url : "/register_node",
