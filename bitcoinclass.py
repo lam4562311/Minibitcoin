@@ -197,6 +197,9 @@ class Blockchain:       #Blockchain
         block_reward = Transaction( "Block_Reward" ,
                                     mywallet.identity, "5.0" ).to_json()
         self.unconfirmed_transactions.insert(0, block_reward)
+
+        self.boardcast_transactions()
+
         if not self.unconfirmed_transactions:
             return False
 
@@ -219,7 +222,19 @@ class Blockchain:       #Blockchain
             mywallet.balance = self.get_balance(mywallet.identity)
 
             for node in self.nodes:
+                consensus = requests.get('http://' + node + '/consensus')
+                print("Updating node " + node + ": " + (consensus.json()['message'] if consensus.status_code == 200 else ("ERROR: " + str(consensus.status_code))))
+                
+
+            for node in self.nodes:
                 requests.put('http://' + node + '/clear_transactions')
+
+            self.difficulty_calculation()
+            
+            for node in self.nodes:
+                requests.get('http://' + node + '/sync_difficulty_info')
+            self.sync_difficulty()
+
             
             return new_block
         else:
@@ -324,17 +339,14 @@ class Blockchain:       #Blockchain
                     balance += float(transaction['value'])
         return balance
     
-    def boardcast_transactions(self, self_address):
+    def boardcast_transactions(self):
         nodes = [node for node in self.nodes]
-        nodes.append(self_address)
-        transactions =[]
         for node in nodes:
             response = requests.get('http://'+ node +'/get_transactions')
             if response.status_code == 200:
-                t= response.json()['transactions']
+                t = Transaction(response.json()['transactions'])
                 for it in t:
-                    transactions.append(it)
-        self.unconfirmed_transactions=transactions
+                    self.add_new_transaction(it)
         return True
 
     def get_address_list(self):
@@ -360,26 +372,38 @@ class Blockchain:       #Blockchain
             interest_list.append(Transaction("interest",item, interest))
         return interest_list
 
-    def sync_difficulty(self,address):
+    def sync_difficulty(self,address = ""):
         record_list=[]
         timestamp_list =[]
-        response = requests.get('http://' + address + '/difficulty_info')
-        if response.status_code == 200:
-            record = response.json()
+
+        if len(address) > 0:
+            response = requests.get('http://' + address + '/difficulty_info')
+            if response.status_code == 200:
+                record = response.json()
+                record_list.append(record)
+                timestamp_list.append(record['timestamp'])
+        else: # local
+            record = self.difficulty_info
             record_list.append(record)
-            timestamp_list.append(record['timestamp'])
+            timestamp_list.append(str(record['timestamp']))
+        
         for node in self.nodes:
             response = requests.get('http://' + node + '/difficulty_info')
             if response.status_code == 200:
                 record = response.json()
                 record_list.append(record)
                 timestamp_list.append(record['timestamp'])
+        
         latest_record = record_list[timestamp_list.index(max(timestamp_list))]
         self.difficulty_info = latest_record
         return True
     
-    def difficulty_calculation(self,address):
-        response = (requests.get('http://' + address + '/difficulty_info')).json()
+    def difficulty_calculation(self,address = ""):
+        if len(address) > 0: 
+            response = (requests.get('http://' + address + '/difficulty_info')).json()
+        else: # local
+            response = self.difficulty_info
+
         spent_time_percent=None
         if response['accumulated_blocks_length'] % 5 == 0:
             if self.difficulty_info['previous_time_spent'] == None:

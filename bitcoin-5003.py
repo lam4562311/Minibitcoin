@@ -119,12 +119,8 @@ def consensus():
 
 @app.route('/mine', methods=[ 'GET'])
 def mine():
-    blockchain.boardcast_transactions(request.host)
-    
     newblock = blockchain.mine(myWallet)
-    for node in blockchain.nodes:
-        ans = requests.get('http://' + node + '/consensus')
-        app.logger.info(ans)
+
     response = {
         'index' : newblock.index,
         'transactions' : newblock.transactions,
@@ -134,12 +130,6 @@ def mine():
         'previous_hash' : newblock.previous_hash
     }
     
-    result = blockchain.difficulty_calculation(request.host)
-    app.logger.warning(result)
-    for node in blockchain.nodes:
-        requests.get('http://' + node + '/sync_difficulty_info')
-    requests.get('http://' + request.host + '/sync_difficulty_info')
-
     return jsonify( response), 200
 
 @app.route('/import_key', methods=['POST'])
@@ -198,7 +188,7 @@ def difficulty_info():
     response= blockchain.difficulty_info
     return jsonify(response), 200
 
-@app.route('/clear_transactions')
+@app.route('/clear_transactions', methods=['put'])
 def clear_transactions():
     blockchain.unconfirmed_transactions = []
     return "True", 200
