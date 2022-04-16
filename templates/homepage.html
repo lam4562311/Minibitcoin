@@ -80,6 +80,15 @@
       <span id="publickey_span"></span>
     </div>
     <button id="show_publickey">Show / Hide Publickey</button>
+    <br>
+    <a href='/export_key'>Export Private Key</a>
+
+    <form action="/import_key" method="POST" enctype="multipart/form-data">
+      Import Private Key
+      <input type="file" name="file" />
+      <input type="submit" />
+    </form>
+    <button id="generate_new_wallet_bt">Generate New Wallet Identity</button>
 
     <hr>
     <p><strong>Register client node</strong><br>
@@ -109,14 +118,7 @@
     <span id="diff_info_span"></span>
     <br>
 
-    <a href='/export_key'>Export Private Key</a>
 
-    <form action="/import_key" method="POST" enctype="multipart/form-data">
-      Import Private Key
-      <input type="file" name="file" />
-      <input type="submit" />
-    </form>
-    <button id="generate_new_wallet_bt">Generate New Wallet Identity</button>
     <hr>
     <p><strong>New Transaction</strong><br>
     </p>
