@@ -156,7 +156,7 @@ def get_status():
     response ={
         'public_key' : myWallet.identity,
         'balance': confirmed_balance if unconfirmed_balance == 0 else (
-            str(confirmed_balance) + "+ (" + str(unconfirmed_balance) + " unconfirmed)")
+            str(confirmed_balance) + " + (" + str(unconfirmed_balance) + " unconfirmed)")
     }
     return jsonify(response),200
 
