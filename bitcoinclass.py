@@ -216,6 +216,11 @@ class Blockchain:       #Blockchain
             self.difficulty_info['current_time_spent'] += (now - init).total_seconds()
             self.difficulty_info['timestamp'] = now
             
+            mywallet.balance = self.get_balance(mywallet.identity)
+
+            for node in self.nodes:
+                requests.put('http://' + node + '/clear_transactions')
+            
             return new_block
         else:
             return False
