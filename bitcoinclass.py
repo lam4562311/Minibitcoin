@@ -150,6 +150,12 @@ class Blockchain:       #Blockchain
 
     def load_tx_json(self, tx_json : str):
         tx = Transaction(**json.loads(tx_json))
+        for utx_json in self.unconfirmed_transactions:
+            utx = json.loads(tx_json)
+            if utx["signature"] == tx.signature: 
+                print("load_tx skipped: " + tx.sender)
+                return # skip tx that we already have (to avoid loop of Block_Reward / interest)
+
         return self.add_new_transaction(tx)
 
     def add_block( self, block, proof):
