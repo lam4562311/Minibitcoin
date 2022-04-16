@@ -414,7 +414,7 @@ class Blockchain:       #Blockchain
                 
                 if abs(spent_time_percent) <= 5 and self.difficulty_info['difficulty'] <= 5:
                     self.difficulty_info['difficulty'] += 1
-                elif abs(spent_time_percent) > 5 and (self.difficulty_info['difficulty'] >= 1):
+                elif abs(spent_time_percent) > 25 and (self.difficulty_info['difficulty'] >= 1):
                     self.difficulty_info['difficulty'] -= 1
             self.difficulty_info['previous_time_spent'] = response['current_time_spent']
             self.difficulty_info['current_time_spent'] = 0
