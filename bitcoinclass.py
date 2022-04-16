@@ -38,30 +38,16 @@ class Transaction:          #Transaction
         
     
     def verify_sender_balance(self, blockchain):
+        # Remember to make sure the unconfimred tx pool is in-sync with other nodes
         if hasattr(self, 'sender') :
-            balance = 0.0
+            mixed_balance = 0.0
             print(blockchain.chain) # debug
-            for block_json in blockchain.chain: # 1: confirmed historical blocks
-                block = json.loads(block_json)
-                print("Block: " + json.dumps(block)) # debug
-                if len(block["transactions"]) > 0:
-                    for tx_json in block["transactions"]:
-                        tx = json.loads(tx_json)
-                        if tx["recipient"] == self.sender:
-                            balance += float(tx["value"])
-                        if tx["sender"] == self.sender:
-                            balance -= (float(tx["value"])+float(tx['fee']))
             
-            if len(blockchain.unconfirmed_transactions) > 0: # 2: unconfirmed tx mempool
-                for unconfimed_tx_json in blockchain.unconfirmed_transactions: 
-                    unconfimed_tx = json.loads(unconfimed_tx_json)
-                    if unconfimed_tx["recipient"] == self.sender:
-                        balance += float(unconfimed_tx["value"])
-                    if unconfimed_tx["sender"] == self.sender:
-                        balance -= (float(unconfimed_tx["value"])+float(unconfimed_tx['fee']))
+            mixed_balance += blockchain.get_confirmed_balance(self.sender)
+            mixed_balance += blockchain.get_unconfirmed_balance(self.sender)
                             
-            print("Balance: " + str(balance) + " / sending: " + self.value) # debug
-            if balance >= (float(self.value)+float(self.fee)):
+            print("Balance: " + str(mixed_balance) + " / sending: " + self.value + " (Plus fee: " + self.fee + ")") # debug
+            if mixed_balance >= (float(self.value)+float(self.fee)):
                 return True
         return False
             
@@ -219,7 +205,7 @@ class Blockchain:       #Blockchain
             self.difficulty_info['current_time_spent'] += (now - init).total_seconds()
             self.difficulty_info['timestamp'] = now
             
-            mywallet.balance = self.get_balance(mywallet.identity)
+            mywallet.balance = self.get_confirmed_balance(mywallet.identity)
 
             for node in self.nodes:
                 consensus = requests.get('http://' + node + '/consensus')
@@ -322,22 +308,36 @@ class Blockchain:       #Blockchain
         return True
     
     
-    def get_balance(self, address):
-    #get the balance from the given address
-        
+    def get_confirmed_balance(self, address):        
         balance = 0.0
         if not len(self.chain):
             return balance
+
         for block_json in self.chain:
             block = json.loads(block_json)
             transactions = block['transactions']
             for transaction_json in transactions:
                 transaction = json.loads(transaction_json)
                 if transaction['sender'] == address:
-                    balance -= (float(transaction['value'])+float(transaction['fee']))
+                    balance -= (float(transaction['value']) + float(transaction['fee']))
                 if transaction['recipient'] == address:
                     balance += float(transaction['value'])
         return balance
+
+    def get_unconfirmed_balance(self, address):
+        unconfirmed_balance = 0.0
+
+        if len(self.unconfirmed_transactions) <= 0:
+            return unconfirmed_balance
+        
+        for unconfimed_tx_json in self.unconfirmed_transactions:
+            unconfimed_tx = json.loads(unconfimed_tx_json)
+            if unconfimed_tx['sender'] == address:
+                unconfirmed_balance -= (float(unconfimed_tx['value']) + float(unconfimed_tx['fee']))
+            if unconfimed_tx['recipient'] == address:
+                unconfirmed_balance += float(unconfimed_tx['value'])
+        
+        return unconfirmed_balance
     
     def boardcast_transactions(self):
         nodes = [node for node in self.nodes]
@@ -367,7 +367,7 @@ class Blockchain:       #Blockchain
         if not len(address_list):
             return interest_list
         for item in address_list:
-            cur_balance = self.get_balance(item)
+            cur_balance = self.get_confirmed_balance(item)
             interest = self.interest_rate * cur_balance
             interest_list.append(Transaction("interest",item, interest))
         return interest_list

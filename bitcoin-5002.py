@@ -150,15 +150,19 @@ def export_key():
 
 @app.route('/get_status', methods=['GET'])
 def get_status():
+    confirmed_balance = blockchain.get_confirmed_balance(myWallet.identity)
+    unconfirmed_balance = blockchain.get_unconfirmed_balance(myWallet.identity)
+    
     response ={
         'public_key' : myWallet.identity,
-        'balance': blockchain.get_balance(myWallet.identity)
+        'balance': confirmed_balance if unconfirmed_balance == 0 else (
+            str(confirmed_balance) + "+ (" + str(unconfirmed_balance) + " unconfirmed)")
     }
     return jsonify(response),200
 
 @app.route('/update_balance', methods=['PUT'])
 def update_balance():
-    myWallet.balance = blockchain.get_balance(myWallet.identity)
+    myWallet.balance = blockchain.get_confirmed_balance(myWallet.identity)
     response = {'message': 'Balance updated'}
     return jsonify(response), 200
 
