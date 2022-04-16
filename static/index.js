@@ -55,7 +55,6 @@ function get_status(){
             success: (data) => {
                 status_span.innerHTML = "Balance: "+JSON.stringify(data.balance);
                 publickey_span.innerHTML = "Public Key: \n"+JSON.stringify(data.public_key);
-                document.getElementById("publickey_div").style.display = "none";
             } 
         }
     );
@@ -178,14 +177,10 @@ function generate_new_wallet(){
 
 $(get_chain_bt).click(()=>get_full_chain());
 $(get_node_bt).click(()=>get_node_list());
-$(get_status_bt).click(()=>get_status());
-$(show_publickey).click(()=>{var x = document.getElementById("publickey_div").style.display;
-                                if(x==="none")
-                                {
-                                    document.getElementById("publickey_div").style.display = "block";
-                                }else{
-                                    document.getElementById("publickey_div").style.display = "none";
-                                }});
+$(show_publickey).click(() => $("#publickey_span").toggle());
+$("#show_manage_privkey").click(() => $("#manage_privatekey").toggle());
 $(mining_bt).click(()=>mining());
 $(get_diff_info_bt).click(()=>get_diff_info());
 $(generate_new_wallet_bt).click(()=>generate_new_wallet());
+
+setInterval(() => get_status(), 1000); // constantly refreshing balance
